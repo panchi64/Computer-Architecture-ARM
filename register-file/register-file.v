@@ -1,37 +1,42 @@
 module register_file(
     input wire [31:0] PW,
     input wire [3:0] RW,
-    input wire E,
+    input wire LE,
     input wire CLK,
-    input wire [3:0] RA,
-    input wire [3:0] RB,
     input wire [3:0] RC,
-    output wire [31:0] PA,
+    input wire [3:0] RB,
+    input wire [3:0] RA,
+    input wire [31:0] PROGCOUNT,
+    output wire [31:0] PC,
     output wire [31:0] PB,
-    output wire [31:0] PC
+    output wire [31:0] PA
 );
 
-    wire [15:0] decoder_output;
+    reg [15:0] write_enable;
     wire [31:0] register_outputs [15:0];
 
-    binary_decoder decoder(
-        .in(RW),
-        .ENABLE(E),
-        .out(decoder_output)
-    );
+    always @(posedge CLK) begin
+        if (LE) begin
+            write_enable <= (1 << RW);
+        end else begin
+            write_enable <= 16'b0;
+        end
+    end
 
     genvar i;
     generate
-        for (i = 0; i < 16; i = i + 1) begin : registers // Generating the 16 registers needed
+        for (i = 0; i < 15; i = i + 1) begin : registers
             register reg_instance(
                 .CLK(CLK),
-                .RESET(1'b0), // No reset signal yet
-                .LOAD(decoder_output[i]),
+                .RESET(1'b0), // Reset not necessary atm
+                .LOAD(write_enable[i]),
                 .d(PW),
                 .q(register_outputs[i])
             );
         end
     endgenerate
+
+    assign register_outputs[15] = PROGCOUNT;
 
     multiplexer mux_A(
         .in0(register_outputs[0]), 
@@ -91,7 +96,7 @@ module register_file(
         .in14(register_outputs[14]), 
         .in15(register_outputs[15]),
         .SEL(RC),
-        .OUT(PC)
+        .OUT(PROGCOUNT)
     );
 
 endmodule
