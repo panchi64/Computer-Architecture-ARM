@@ -96,7 +96,7 @@ module register_file(
         .in14(register_outputs[14]), 
         .in15(register_outputs[15]),
         .SEL(RC),
-        .OUT(PROGCOUNT)
+        .OUT(PC)
     );
 
 endmodule
