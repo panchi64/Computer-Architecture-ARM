@@ -2,7 +2,7 @@
 module multiplexer(
     input wire [31:0] in0, in1, in2, in3, in4, in5, in6, in7, in8, in9, in10, in11, in12, in13, in14, in15,
     input wire [3:0] SEL,
-    output wire [31:0] OUT
+    output reg [31:0] OUT // Using a reg because I'm using the 'always' method and verilog syntactically requires a reg with it
 );
 
     always @(*) begin
