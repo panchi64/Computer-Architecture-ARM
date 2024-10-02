@@ -4,7 +4,7 @@ module register(
      input wire RESET,
      input wire LOAD,
      input wire [31:0] d,
-     output reg [31:0] q;
+     output reg [31:0] q
 );
 
     always @(posedge CLK or posedge RESET) begin

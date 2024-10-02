@@ -2,7 +2,7 @@
 module multiplexer(
     input wire [3:0] in0, in1, in2, in3, in4, in5, in6, in7, in8, in9, in10, in11, in12, in13, in14, in15,
     input wire SEL,
-    input wire [3:0] OUT
+    output wire [3:0] OUT
 );
 
     always @(*) begin
