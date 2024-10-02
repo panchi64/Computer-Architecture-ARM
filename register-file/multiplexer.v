@@ -6,7 +6,7 @@ module multiplexer(
 );
 
     always @(*) begin
-        case(sel)
+        case(SEL)
             4'b0000: out = in0;
             4'b0001: out = in1;
             4'b0010: out = in2;
