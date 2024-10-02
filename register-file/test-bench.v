@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module register_file_tb;
+module test_bench;
 
     // Inputs
     reg [31:0] PW;

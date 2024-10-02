@@ -15,8 +15,8 @@ module register_file(
     wire [31:0] register_outputs [15:0];
 
     binary_decoder decoder(
-        .in(RW)
-        .ENABLE(E)
+        .in(RW),
+        .ENABLE(E),
         .out(decoder_output)
     );
 
