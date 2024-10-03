@@ -27,10 +27,10 @@ module register_file_tb;
   end
 
   initial begin
-    $display("Time  RW RA RB RC    PW       PA       PB       PC   PROGCOUNT");
-    $display("----  -- -- -- -- -------- -------- -------- -------- --------");
-    $monitor("%4d: %2d %2d %2d %2d %8d %8d %8d %8d %8d", 
-             $time, RW, RA, RB, RC, PW, PA, PB, PC, PROGCOUNT);
+    $display("Time  RW RA RB RC    PW       PA       PB       PC");
+    $display("----  -- -- -- -- -------- -------- -------- --------");
+    $monitor("%4d: %2d %2d %2d %2d %8d %8d %8d %8d", 
+             $time, RW, RA, RB, RC, PW, PA, PB, PC);
   end
 
   initial begin
@@ -50,7 +50,6 @@ module register_file_tb;
       RA = RA + 1;
       RB = (RB + 1) % 16; // Wrap around to 0 after 15
       RC = (RC + 1) % 16; // Wrap around to 0 after 15
-      PROGCOUNT = PROGCOUNT + 1;
     end
 
     // RA reaches 15
