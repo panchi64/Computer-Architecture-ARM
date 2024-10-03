@@ -12,24 +12,22 @@ module register_file(
     output wire [31:0] PA
 );
 
-    reg [15:0] write_enable;
+    wire [15:0] decoder_output;
     wire [31:0] register_outputs [15:0];
 
-    always @(posedge CLK) begin
-        if (LE) begin
-            write_enable <= (1 << RW);
-        end else begin
-            write_enable <= 16'b0;
-        end
-    end
+    binary_decoder decoder(
+        .in(RW),
+        .ENABLE(LE),
+        .out(decoder_output)
+    );
+
 
     genvar i;
     generate
         for (i = 0; i < 15; i = i + 1) begin : registers
             register reg_instance(
                 .CLK(CLK),
-                .RESET(1'b0), // Reset not necessary atm
-                .LOAD(write_enable[i]),
+                .LOAD(decoder_output[i]),
                 .d(PW),
                 .q(register_outputs[i])
             );
