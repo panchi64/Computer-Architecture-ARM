@@ -11,15 +11,6 @@ module instruction_memory(
         for (i = 0; i < 256; i = i + 1) begin
             memory[i] = 8'h0;
         end
-
-        file = $fopen("precharge-data.txt", "r");
-        if (file) begin
-            for (i = 0; i < 16; i = i + 1) begin
-                status = $fscanf(file, "%b", temp);
-                if (status > 0) memory[i] = temp;
-            end
-            $fclose(file);
-        end
     end
 
     // Instruction fetch
