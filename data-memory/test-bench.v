@@ -8,6 +8,13 @@ module combined_memory_tb;
     reg [7:0] A_instr;
     wire [31:0] I;
 
+     // File handling variables
+    integer file, status;
+    reg [7:0] byte_temp;
+    integer instr_file, instr_status;
+    reg [31:0] instr_temp;
+
+
     // Instantiate both memories
     data_memory dm (
         .DI(DI),
@@ -23,6 +30,77 @@ module combined_memory_tb;
         .I(I)
     );
 
+    // Task to preload data memory
+    task preload_data_memory;
+        integer i;
+        begin
+            // First, write 0 to all memory locations
+            Size = 1'b0;  // Byte mode
+            RW = 1'b1;    // Write mode
+            E = 1'b1;     // Enable writes
+            DI = 32'h0;
+            
+            for (i = 0; i < 256; i = i + 1) begin
+                A_data = i[7:0];
+                #5;  // Small delay between writes
+            end
+
+            // Now read from file and write to memory
+            file = $fopen("precharge-data.txt", "r");
+            if (file) begin
+                i = 0;
+                while (i < 16) begin  // Read up to 16 bytes
+                    status = $fscanf(file, "%b", byte_temp);
+                    if (status == 1) begin
+                        A_data = i[7:0];
+                        DI = {24'b0, byte_temp};  // Extend to 32 bits
+                        #5;  // Small delay between writes
+                        i = i + 1;
+                    end
+                    else begin
+                        i = 16;
+                    end
+                end
+                $fclose(file);
+            end
+            else begin
+                $display("Error: Could not open precharge-data.txt");
+            end
+
+            // Reset control signals
+            RW = 1'b0;
+            E = 1'b0;
+            #5;  // Small settling delay
+        end
+    endtask
+
+    task preload_instruction_memory;
+        integer i;
+        begin
+            // Initialize instruction memory from file
+            instr_file = $fopen("precharge-data.txt", "r");
+            if (instr_file) begin
+                i = 0;
+                while (i < 64) begin  // Read up to 64 instructions (adjust as needed)
+                    instr_status = $fscanf(instr_file, "%b", instr_temp);
+                    if (instr_status == 1) begin
+                        // Use readmemb to load the whole memory instead
+                        $readmemb("precharge-data.txt", im.memory);
+                        i = 64; // Exit after loading
+                    end
+                    else begin
+                        i = 64;  // Exit if we can't read more
+                    end
+                end
+                $fclose(instr_file);
+            end
+            else begin
+                $display("Error: Could not open precharge-instructions.txt");
+            end
+
+            #5;  // Small settling delay
+        end
+    endtask
     initial begin
         // Initialize all signals
         DI = 32'h0;
@@ -31,6 +109,10 @@ module combined_memory_tb;
         Size = 1'b0;
         RW = 1'b0;
         E = 1'b0;
+
+        // Preload the memory
+        preload_instruction_memory();
+        preload_data_memory();
 
         // Wait for memory initialization
         #10;
