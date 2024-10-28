@@ -8,7 +8,7 @@ module mem_wb_reg (
     
     // Control signals output
     output reg reg_write_enable_out,    // Register write enable
-    output reg mem_to_reg_select_out,   // Memory to register select
+    output reg mem_to_reg_select_out    // Memory to register select
 );
 
     always @(posedge clk) begin

@@ -19,7 +19,7 @@ module id_ex_reg (
     output reg [1:0] alu_control_out,    // ALU operation control
     
     // Data outputs
-    output reg [31:0] ext_imm_out,       // Extended immediate value
+    output reg [31:0] ext_imm_out        // Extended immediate value
 );
 
     always @(posedge clk) begin

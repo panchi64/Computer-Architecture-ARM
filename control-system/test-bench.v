@@ -135,7 +135,7 @@ module arm_pipeline_tb;
     .mem_write_enable_out(EX_MEM_MemWrite),
   );
 
-  // MEM/WB Pipeline Register Instance 
+  // MEM/WB Pipeline Register Instance ✅
   mem_wb_reg mem_wb (
     .clk(clk),
     .reset(reset),
@@ -145,7 +145,6 @@ module arm_pipeline_tb;
     .mem_to_reg_select_out(MEM_WB_MemtoReg)
   );
 
-  // Test stimulus
   initial begin
     // Initialize instruction memory with the given program
     imem.memory[0] = 32'b11100010_00010001_00000000_00000000; // ANDS R0,R1,#0

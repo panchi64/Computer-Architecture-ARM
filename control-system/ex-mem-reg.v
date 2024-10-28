@@ -8,7 +8,7 @@ module ex_mem_reg (
     
     // Control signals output
     output reg reg_write_enable_out,        // Register write enable
-    output reg mem_write_enable_out,        // Memory write enable
+    output reg mem_write_enable_out         // Memory write enable
 );
 
     always @(posedge clk) begin
