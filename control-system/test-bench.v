@@ -30,7 +30,6 @@ module arm_pipeline_tb;
   wire PCSrc;                 // PC source selection for branches
   
   // EX Stage Signals
-  wire [31:0] ID_EX_ExtImm;   // Extended immediate value
   wire ID_EX_RegWrite;        // Register write control in EX stage
   wire ID_EX_MemWrite;        // Memory write control in EX stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
@@ -47,6 +46,10 @@ module arm_pipeline_tb;
 
   // Pipeline Register Enable Signals
   reg IF_ID_Enable;               // IF/ID register enable
+
+  wire [1:0] S_bit_muxed;        // Muxed status bits
+  wire [1:0] ALUControl_muxed;   // Muxed ALU control
+  wire MemtoReg_muxed;           // Muxed memory to register select
 
   // Instruction Memory Instance ✅
   instruction_memory imem (
@@ -83,6 +86,7 @@ module arm_pipeline_tb;
   );
 
   // Control Unit Multiplexer Instance ✅
+  // Control Unit Multiplexer Instance
   cu_mux control_mux (
     .reg_write_enable_in(RegWrite),
     .mem_write_enable_in(MemWrite),
@@ -95,10 +99,10 @@ module arm_pipeline_tb;
     .mem_write_enable_out(MemWrite_muxed),
     .mem_to_reg_select_out(MemtoReg_muxed),
     .alu_src_select_out(ALUSrc_muxed),
-    .status_bits_out(S_bit_muxed),
+    .status_bits_out(S_bit_muxed),    
     .alu_control_out(ALUControl_muxed),
     .pc_src_select_out(PCSrc_muxed)
-  );
+);
 
   // IF/ID Pipeline Register Instance ✅
   if_id_reg if_id (
@@ -118,13 +122,11 @@ module arm_pipeline_tb;
     .mem_to_reg_select_in(MemtoReg_muxed),
     .alu_src_select_in(ALUSrc_muxed),
     .alu_control_in(ALUControl_muxed),
-    .ext_imm_in(ExtImm),
     .reg_write_enable_out(ID_EX_RegWrite),
     .mem_write_enable_out(ID_EX_MemWrite),
     .mem_to_reg_select_out(ID_EX_MemtoReg),
     .alu_src_select_out(ID_EX_ALUSrc),
-    .alu_control_out(ID_EX_ALUControl),
-    .ext_imm_out(ID_EX_ExtImm)
+    .alu_control_out(ID_EX_ALUControl)
 );
 
   // EX/MEM Pipeline Register Instance ✅
