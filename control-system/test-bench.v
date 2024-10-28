@@ -11,10 +11,11 @@ module arm_pipeline_tb;
   reg reset;                  // Global reset signal
   
   // IF Stage Signals
-  wire [31:0] PC_current;     // Current Program Counter value
-  wire [31:0] PC_plus_4;      // PC + 4 for next sequential instruction
-  wire [31:0] instruction;    // Current instruction from memory
-  wire [1:0]  PC_enable;      // Enable signal for the Program Counter
+  reg PC_enable;                 // Program Counter enable signal (changed from wire to reg)
+  wire [31:0] PC_current;        // Current Program Counter value
+  wire [31:0] PC_plus_4;         // PC + 4 for next sequential instruction
+  wire [31:0] instruction;       // Current instruction from memory
+
   
   // ID Stage Signals
   wire [31:0] IF_ID_Instr;    // Instruction passed to ID stage
@@ -51,16 +52,16 @@ module arm_pipeline_tb;
   instruction_memory imem (
     .address(PC_current[7:0]),
     .instruction(instruction)
-  );
+);
 
   // Program Counter Register Instance ✅
   program_counter pc_reg (
     .clk(clk),
     .reset(reset),
+    .enable(PC_enable),
     .pc_next(PC_plus_4),
-    .pc_current(PC_current),
-    .enable(PC_enable)
-  );
+    .pc_current(PC_current)
+);
 
   // IF Stage Adder Instance ✅
   adder if_adder (
@@ -112,18 +113,19 @@ module arm_pipeline_tb;
   id_ex_reg id_ex (
     .clk(clk),
     .reset(reset),
-    .ext_imm_in(ExtImm),
     .reg_write_enable_in(RegWrite_muxed),
     .mem_write_enable_in(MemWrite_muxed),
     .mem_to_reg_select_in(MemtoReg_muxed),
     .alu_src_select_in(ALUSrc_muxed),
     .alu_control_in(ALUControl_muxed),
-    .ext_imm_out(ID_EX_ExtImm),
-    .reg_write_out(ID_EX_RegWrite),
-    .mem_write_out(ID_EX_MemWrite),
+    .ext_imm_in(ExtImm),
+    .reg_write_enable_out(ID_EX_RegWrite),
+    .mem_write_enable_out(ID_EX_MemWrite),
+    .mem_to_reg_select_out(ID_EX_MemtoReg),
     .alu_src_select_out(ID_EX_ALUSrc),
-    .alu_control_out(ID_EX_ALUControl)
-  );
+    .alu_control_out(ID_EX_ALUControl),
+    .ext_imm_out(ID_EX_ExtImm)
+);
 
   // EX/MEM Pipeline Register Instance ✅
   ex_mem_reg ex_mem (

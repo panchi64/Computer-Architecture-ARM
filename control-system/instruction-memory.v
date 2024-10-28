@@ -4,7 +4,6 @@ module instruction_memory(
 );
     reg [7:0] memory [0:255];
     integer i;
-    reg [7:0] temp;
 
     // Initialize memory
     initial begin
@@ -13,8 +12,8 @@ module instruction_memory(
         end
     end
 
-    // Instruction fetch
+    // Instruction fetch - fixed variable names
     always @(*) begin
-        I = {memory[A], memory[A+1], memory[A+2], memory[A+3]}; 
+        instruction = {memory[address], memory[address+1], memory[address+2], memory[address+3]}; 
     end
 endmodule
