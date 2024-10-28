@@ -1,9 +1,9 @@
 module instruction_memory(
-    input wire [7:0] A,
-    output reg [31:0] I
+    input wire [7:0] address,
+    output reg [31:0] instruction
 );
     reg [7:0] memory [0:255];
-    integer i, file, status;
+    integer i;
     reg [7:0] temp;
 
     // Initialize memory

@@ -25,17 +25,11 @@ module arm_pipeline_tb;
   wire MemWrite;              // Memory write enable
   wire MemtoReg;              // Select between ALU result and memory data
   wire ALUSrc;                // Select between register and immediate
-  wire [1:0] RegSrc;          // Register source selection
-  wire [1:0] ImmSrc;          // Immediate source format selection
+  wire [1:0] S_bit;          // Register source selection
   wire [1:0] ALUControl;      // ALU operation control
   wire PCSrc;                 // PC source selection for branches
   
   // EX Stage Signals
-  wire [31:0] ID_EX_PC;       // PC value in EX stage
-  wire [31:0] ID_EX_RD1;      // First register read data
-  wire [31:0] ID_EX_RD2;      // Second register read data
-  wire [3:0] ID_EX_RA1;       // First register address
-  wire [3:0] ID_EX_RA2;       // Second register address
   wire [31:0] ID_EX_ExtImm;   // Extended immediate value
   wire [3:0] ID_EX_WA;        // Write address for register file
   wire ID_EX_RegWrite;        // Register write control in EX stage
@@ -62,13 +56,13 @@ module arm_pipeline_tb;
   // Pipeline Register Enable Signals
   reg IF_ID_Enable;           // IF/ID register enable
 
-  // Instruction Memory Instance
-  instr_memory imem (
-    .pc(PC_current),
+  // Instruction Memory Instance ✅
+  instruction_memory imem (
+    .address(PC_current[7:0]),
     .instruction(instruction)
   );
 
-  // Program Counter Register Instance
+  // Program Counter Register Instance ✅
   program_counter pc_reg (
     .clk(clk),
     .reset(reset),
@@ -77,11 +71,11 @@ module arm_pipeline_tb;
     .enable(PC_enable)
   );
 
-  // IF Stage Adder Instance
+  // IF Stage Adder Instance ✅
   adder if_adder (
-    .a(PC_current),
-    .b(32'd4),
-    .result(PC_plus_4)
+    .in_a(PC_current),
+    .in_b(32'd4),
+    .out(PC_plus_4)
   );
 
   // Control Unit Instance
@@ -91,8 +85,7 @@ module arm_pipeline_tb;
     .MemWrite(MemWrite),
     .MemtoReg(MemtoReg),
     .ALUSrc(ALUSrc),
-    .RegSrc(RegSrc),
-    .ImmSrc(ImmSrc),
+    .S_bit(S_bit),
     .ALUControl(ALUControl),
     .PCSrc(PCSrc)
   );
@@ -103,16 +96,14 @@ module arm_pipeline_tb;
     .MemWrite_in(MemWrite),
     .MemtoReg_in(MemtoReg),
     .ALUSrc_in(ALUSrc),
-    .RegSrc_in(RegSrc),
-    .ImmSrc_in(ImmSrc),
+    .S_bit_in(S_bit),
     .ALUControl_in(ALUControl),
     .PCSrc_in(PCSrc),
     .RegWrite_out(RegWrite_muxed),
     .MemWrite_out(MemWrite_muxed),
     .MemtoReg_out(MemtoReg_muxed),
     .ALUSrc_out(ALUSrc_muxed),
-    .RegSrc_out(RegSrc_muxed),
-    .ImmSrc_out(ImmSrc_muxed),
+    .S_bit_out(S_bit_muxed),
     .ALUControl_out(ALUControl_muxed),
     .PCSrc_out(PCSrc_muxed)
   );
@@ -144,11 +135,6 @@ module arm_pipeline_tb;
     .mem_to_reg_in(MemtoReg_muxed),
     .alu_src_in(ALUSrc_muxed),
     .alu_control_in(ALUControl_muxed),
-    .pc_out(ID_EX_PC),
-    .rd1_out(ID_EX_RD1),
-    .rd2_out(ID_EX_RD2),
-    .ra1_out(ID_EX_RA1),
-    .ra2_out(ID_EX_RA2),
     .ext_imm_out(ID_EX_ExtImm),
     .wa_out(ID_EX_WA),
     .reg_write_out(ID_EX_RegWrite),
@@ -237,8 +223,7 @@ module arm_pipeline_tb;
         "  PCSrc:       %b\n" ,
         "  RegWrite:    %b\n" ,
         "  MemWrite:    %b\n" ,
-        "  RegSrc:      %b\n" ,
-        "  ImmSrc:      %b\n" ,
+        "  S_bit:      %b\n" ,
         "  ALUControl:  %b\n" ,
         "----------------------------------------\n",
         $time, 
@@ -246,7 +231,7 @@ module arm_pipeline_tb;
         PC_current,
         instruction,
         IF_ID_Enable,
-        PCSrc, RegWrite, MemWrite, RegSrc, ImmSrc, ALUControl
+        PCSrc, RegWrite, MemWrite, S_bit, ALUControl
     );
     
     // Run for specified 40 time units
