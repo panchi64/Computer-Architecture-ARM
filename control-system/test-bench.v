@@ -17,7 +17,6 @@ module arm_pipeline_tb;
   wire [1:0]  PC_enable;      // Enable signal for the Program Counter
   
   // ID Stage Signals
-  wire [31:0] IF_ID_PC;       // PC value passed to ID stage
   wire [31:0] IF_ID_Instr;    // Instruction passed to ID stage
   
   // Control Unit Signals
@@ -25,7 +24,7 @@ module arm_pipeline_tb;
   wire MemWrite;              // Memory write enable
   wire MemtoReg;              // Select between ALU result and memory data
   wire ALUSrc;                // Select between register and immediate
-  wire [1:0] S_bit;          // Register source selection
+  wire [1:0] S_bit;           // Register source selection
   wire [1:0] ALUControl;      // ALU operation control
   wire PCSrc;                 // PC source selection for branches
   
@@ -34,27 +33,20 @@ module arm_pipeline_tb;
   wire [3:0] ID_EX_WA;        // Write address for register file
   wire ID_EX_RegWrite;        // Register write control in EX stage
   wire ID_EX_MemWrite;        // Memory write control in EX stage
-  wire ID_EX_MemtoReg;        // Memory to register control in EX stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
   wire [1:0] ID_EX_ALUControl;// ALU operation control in EX stage
   
   // MEM Stage Signals
-  wire [31:0] EX_MEM_ALUResult;   // ALU result in MEM stage
-  wire [31:0] EX_MEM_WriteData;   // Data to write to memory
-  wire [3:0] EX_MEM_WA;           // Write address in MEM stage
   wire EX_MEM_RegWrite;           // Register write control in MEM stage
   wire EX_MEM_MemWrite;           // Memory write control in MEM stage
   wire EX_MEM_MemtoReg;           // Memory to register control in MEM stage
   
   // WB Stage Signals
-  wire [31:0] MEM_WB_ALUResult;   // ALU result in WB stage
-  wire [31:0] MEM_WB_ReadData;    // Data read from memory
-  wire [3:0] MEM_WB_WA;           // Write address in WB stage
   wire MEM_WB_RegWrite;           // Register write control in WB stage
   wire MEM_WB_MemtoReg;           // Memory to register control in WB stage
 
   // Pipeline Register Enable Signals
-  reg IF_ID_Enable;           // IF/ID register enable
+  reg IF_ID_Enable;               // IF/ID register enable
 
   // Instruction Memory Instance ✅
   instruction_memory imem (
@@ -113,9 +105,7 @@ module arm_pipeline_tb;
     .clk(clk),
     .reset(reset),
     .enable(IF_ID_Enable),
-    .pc_in(PC_current),
     .instruction_in(instruction),
-    .pc_out(IF_ID_PC),
     .instruction_out(IF_ID_Instr)
   );
 
@@ -123,13 +113,7 @@ module arm_pipeline_tb;
   id_ex_reg id_ex (
     .clk(clk),
     .reset(reset),
-    .pc_in(IF_ID_PC),
-    .rd1_in(RD1),
-    .rd2_in(RD2),
-    .ra1_in(IF_ID_Instr[19:16]),
-    .ra2_in(IF_ID_Instr[3:0]),
     .ext_imm_in(ExtImm),
-    .wa_in(IF_ID_Instr[15:12]),
     .reg_write_in(RegWrite_muxed),
     .mem_write_in(MemWrite_muxed),
     .mem_to_reg_in(MemtoReg_muxed),
@@ -139,7 +123,6 @@ module arm_pipeline_tb;
     .wa_out(ID_EX_WA),
     .reg_write_out(ID_EX_RegWrite),
     .mem_write_out(ID_EX_MemWrite),
-    .mem_to_reg_out(ID_EX_MemtoReg),
     .alu_src_out(ID_EX_ALUSrc),
     .alu_control_out(ID_EX_ALUControl)
   );
@@ -148,32 +131,19 @@ module arm_pipeline_tb;
   ex_mem_reg ex_mem (
     .clk(clk),
     .reset(reset),
-    .alu_result_in(ALUResult),
-    .write_data_in(ID_EX_RD2),
     .wa_in(ID_EX_WA),
     .reg_write_in(ID_EX_RegWrite),
     .mem_write_in(ID_EX_MemWrite),
-    .mem_to_reg_in(ID_EX_MemtoReg),
-    .alu_result_out(EX_MEM_ALUResult),
-    .write_data_out(EX_MEM_WriteData),
-    .wa_out(EX_MEM_WA),
     .reg_write_out(EX_MEM_RegWrite),
     .mem_write_out(EX_MEM_MemWrite),
-    .mem_to_reg_out(EX_MEM_MemtoReg)
   );
 
   // MEM/WB Pipeline Register Instance
   mem_wb_reg mem_wb (
     .clk(clk),
     .reset(reset),
-    .alu_result_in(EX_MEM_ALUResult),
-    .read_data_in(ReadData),
-    .wa_in(EX_MEM_WA),
     .reg_write_in(EX_MEM_RegWrite),
     .mem_to_reg_in(EX_MEM_MemtoReg),
-    .alu_result_out(MEM_WB_ALUResult),
-    .read_data_out(MEM_WB_ReadData),
-    .wa_out(MEM_WB_WA),
     .reg_write_out(MEM_WB_RegWrite),
     .mem_to_reg_out(MEM_WB_MemtoReg)
   );
