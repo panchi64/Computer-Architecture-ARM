@@ -1,9 +1,9 @@
 module program_counter(
     input wire clk,
     input wire reset,
-    input wire E,          // Enable signal mentioned in the requirements
-    input wire [7:0] next_pc,  // Input from adder for potential branch
-    output reg [7:0] pc    // Current PC value
+    input wire enable,          // Enable signal mentioned in the requirements
+    input wire [7:0] pc_next,   // Input from adder for potential branch
+    output reg [7:0] pc_current // Current PC value
 );
 
     // Rising edge triggered with synchronous reset
