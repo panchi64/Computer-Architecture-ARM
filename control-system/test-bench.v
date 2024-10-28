@@ -132,7 +132,7 @@ module arm_pipeline_tb;
     .reg_write_enable_in(ID_EX_RegWrite),
     .mem_write_enable_in(ID_EX_MemWrite),
     .reg_write_enable_out(EX_MEM_RegWrite),
-    .mem_write_enable_out(EX_MEM_MemWrite),
+    .mem_write_enable_out(EX_MEM_MemWrite)
   );
 
   // MEM/WB Pipeline Register Instance ✅

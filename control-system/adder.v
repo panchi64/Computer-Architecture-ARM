@@ -1,4 +1,4 @@
-module pc_adder(
+module adder(
     input [31:0] in_a,
     input [31:0] in_b,
     output [31:0] out
