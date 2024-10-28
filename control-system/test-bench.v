@@ -149,6 +149,10 @@ module arm_pipeline_tb;
     .mem_to_reg_select_out(MEM_WB_MemtoReg)
   );
 
+  reg [31:0] cycle_count;
+  wire [63:0] monitor_time;
+  assign monitor_time = $time/2;
+
   initial begin
     // Initialize instruction memory with the given program
     imem.memory[0] = 32'b11100010_00010001_00000000_00000000; // ANDS R0,R1,#0
@@ -169,51 +173,54 @@ module arm_pipeline_tb;
     reset = 1;
     IF_ID_Enable = 1;
     PC_enable = 1;
+    cycle_count = 0;
+    
+    $display("\n=== Simulation Start ===\n");
     S_bit = 2'b00; // Initialize S_bit to 0
     
-    // Wait for 3 clock cycles and release reset
+    // Wait 3 cycles then release reset
     #3;
     reset = 0;
 
     // Change S_bit to 1 at time 32
     #29; // Wait until time 32
     S_bit = 2'b01; // Set S_bit to 1
-    
-    // Monitor signals
-    $display("\n=== Simulation Start ===");
-    
-    // Monitor signals with organized output
-    $monitor(
-        "\nTime: %0d ns\n" ,
-        "----------------------------------------\n" ,
-        "Clock: %b  Reset: %b\n" ,
-        "----------------------------------------\n" ,
-        "Program Counter: %h\n" ,
-        "Current Instruction: %h\n" ,
-        "----------------------------------------\n" ,
-        "Pipeline Controls:\n" ,
-        "  IF/ID Enable:   %b\n" ,
-        "----------------------------------------\n" ,
-        "Control Signals:\n" ,
-        "  PCSrc:       %b\n" ,
-        "  RegWrite:    %b\n" ,
-        "  MemWrite:    %b\n" ,
-        "  S_bit:      %b\n" ,
-        "  ALUControl:  %b\n" ,
-        "----------------------------------------\n",
-        $time, 
-        clk, reset,
+
+    // Simple monitoring format
+    $monitor("\nCycle: %d\nPC: %h\nInstruction: %h\nControl: PCSrc=%b RegWrite=%b MemWrite=%b ALUOp=%b\n----------------",
+        monitor_time,
         PC_current,
         instruction,
-        IF_ID_Enable,
-        PCSrc, RegWrite, MemWrite, S_bit, ALUControl
+        PCSrc,
+        RegWrite,
+        MemWrite,
+        ALUControl
     );
-    
-    // Run for specified 40 time units
+
     #40;
-    
-    // End simulation
     $finish;
-  end
+end
+
+// Add instruction decoder
+always @(instruction) begin
+    case(instruction)
+        32'b11100010_00010001_00000000_00000000: 
+            $display("Decode: ANDS R0,R1,#0");
+        32'b11100000_10000000_01010001_10000011:
+            $display("Decode: ADD R5,R0,R3,LSL #3");
+        32'b11100111_11010001_00100000_00000000:
+            $display("Decode: LDRB R2,[R1,R0]");
+        32'b11100101_10001010_01010000_00000000:
+            $display("Decode: STR R5,[R10,#0]");
+        32'b00011010_11111111_11111111_11111101:
+            $display("Decode: BNE -3");
+        32'b11011011_00000000_00000000_00001001:
+            $display("Decode: BLLE +9");
+        32'b00000000_00000000_00000000_00000000:
+            $display("Decode: NOP");
+        default: 
+            $display("Decode: Unknown Instruction");
+    endcase
+end
 
 endmodule
