@@ -11,8 +11,7 @@ module mem_wb_reg (
     output reg mem_to_reg_select_out,   // Memory to register select
 );
 
-    // On every clock edge or reset
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             // Reset control signals
             reg_write_enable_out <= 0;

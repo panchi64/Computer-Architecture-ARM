@@ -22,8 +22,7 @@ module id_ex_reg (
     output reg [31:0] ext_imm_out,       // Extended immediate value
 );
 
-    // On every clock edge or reset
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             // Reset all control signals
             reg_write_enable_out <= 0;

@@ -11,8 +11,7 @@ module ex_mem_reg (
     output reg mem_write_enable_out,        // Memory write enable
 );
 
-    // On every clock edge or reset
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             // Reset control signals
             reg_write_enable_out <= 0;

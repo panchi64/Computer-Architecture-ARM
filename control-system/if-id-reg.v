@@ -6,11 +6,10 @@ module if_id_register(
     output reg [31:0] instruction_out    // Instruction to ID stage
 );
 
-    // Rising edge triggered with synchronous reset
     always @(posedge clk) begin
         if (reset)
             instruction_out <= 32'b0;           // Clear instruction on reset
-        else if (E)                             // Only load when enabled
+        else if (enable)                             // Only load when enabled
             instruction_out <= instruction_in;  // Latch new instruction
     end
 
