@@ -1,22 +1,28 @@
-module mem_wb_register(
-    input wire clk,
-    input wire reset,
-    // Control signals from MEM stage
-    input wire [3:0] wb_control_in,   // Control signals for WB stage
+module mem_wb_reg (
+    input wire clk,                     // Clock input
+    input wire reset,                   // Reset signal
     
-    // Control signals to WB stage
-    output reg [3:0] wb_control_out
+    // Control signals input
+    input wire reg_write_enable_in,     // Register write enable
+    input wire mem_to_reg_select_in,    // Memory to register select
+    
+    // Control signals output
+    output reg reg_write_enable_out,    // Register write enable
+    output reg mem_to_reg_select_out,   // Memory to register select
 );
 
-    // Rising edge triggered with synchronous reset
-    always @(posedge clk) begin
+    // On every clock edge or reset
+    always @(posedge clk or posedge reset) begin
         if (reset) begin
-            // Clear control signals on reset
-            wb_control_out <= 4'b0;
+            // Reset control signals
+            reg_write_enable_out <= 0;
+            mem_to_reg_select_out <= 0;
         end
         else begin
-            // Propagate control signals
-            wb_control_out <= wb_control_in;
+            // Update control signals
+            reg_write_enable_out <= reg_write_enable_in;
+            mem_to_reg_select_out <= mem_to_reg_select_in;
+            
         end
     end
 

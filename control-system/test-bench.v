@@ -30,7 +30,6 @@ module arm_pipeline_tb;
   
   // EX Stage Signals
   wire [31:0] ID_EX_ExtImm;   // Extended immediate value
-  wire [3:0] ID_EX_WA;        // Write address for register file
   wire ID_EX_RegWrite;        // Register write control in EX stage
   wire ID_EX_MemWrite;        // Memory write control in EX stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
@@ -70,37 +69,37 @@ module arm_pipeline_tb;
     .out(PC_plus_4)
   );
 
-  // Control Unit Instance
+  // Control Unit Instance ✅
   control_unit cu (
     .instruction(IF_ID_Instr),
-    .RegWrite(RegWrite),
-    .MemWrite(MemWrite),
-    .MemtoReg(MemtoReg),
-    .ALUSrc(ALUSrc),
-    .S_bit(S_bit),
-    .ALUControl(ALUControl),
-    .PCSrc(PCSrc)
+    .reg_write_enable(RegWrite),
+    .mem_write_enable(MemWrite),
+    .mem_to_reg_select(MemtoReg),
+    .alu_source_select(ALUSrc),
+    .status_bits(S_bit),
+    .alu_operation(ALUControl),
+    .pc_source_select(PCSrc)
   );
 
-  // Control Unit Multiplexer Instance
+  // Control Unit Multiplexer Instance ✅
   cu_mux control_mux (
-    .RegWrite_in(RegWrite),
-    .MemWrite_in(MemWrite),
-    .MemtoReg_in(MemtoReg),
-    .ALUSrc_in(ALUSrc),
-    .S_bit_in(S_bit),
-    .ALUControl_in(ALUControl),
-    .PCSrc_in(PCSrc),
-    .RegWrite_out(RegWrite_muxed),
-    .MemWrite_out(MemWrite_muxed),
-    .MemtoReg_out(MemtoReg_muxed),
-    .ALUSrc_out(ALUSrc_muxed),
-    .S_bit_out(S_bit_muxed),
-    .ALUControl_out(ALUControl_muxed),
-    .PCSrc_out(PCSrc_muxed)
+    .reg_write_enable_in(RegWrite),
+    .mem_write_enable_in(MemWrite),
+    .mem_to_reg_select_in(MemtoReg),
+    .alu_src_in(ALUSrc),
+    .status_bits_in(S_bit),
+    .alu_control_in(ALUControl),
+    .pc_src_select_in(PCSrc),
+    .reg_write_enable_out(RegWrite_muxed),
+    .mem_write_enable_out(MemWrite_muxed),
+    .mem_to_reg_select_out(MemtoReg_muxed),
+    .alu_src_select_out(ALUSrc_muxed),
+    .status_bits_out(S_bit_muxed),
+    .alu_control_out(ALUControl_muxed),
+    .pc_src_select_out(PCSrc_muxed)
   );
 
-  // IF/ID Pipeline Register Instance
+  // IF/ID Pipeline Register Instance ✅
   if_id_reg if_id (
     .clk(clk),
     .reset(reset),
@@ -109,43 +108,41 @@ module arm_pipeline_tb;
     .instruction_out(IF_ID_Instr)
   );
 
-  // ID/EX Pipeline Register Instance
+  // ID/EX Pipeline Register Instance ✅
   id_ex_reg id_ex (
     .clk(clk),
     .reset(reset),
     .ext_imm_in(ExtImm),
-    .reg_write_in(RegWrite_muxed),
-    .mem_write_in(MemWrite_muxed),
-    .mem_to_reg_in(MemtoReg_muxed),
-    .alu_src_in(ALUSrc_muxed),
+    .reg_write_enable_in(RegWrite_muxed),
+    .mem_write_enable_in(MemWrite_muxed),
+    .mem_to_reg_select_in(MemtoReg_muxed),
+    .alu_src_select_in(ALUSrc_muxed),
     .alu_control_in(ALUControl_muxed),
     .ext_imm_out(ID_EX_ExtImm),
-    .wa_out(ID_EX_WA),
     .reg_write_out(ID_EX_RegWrite),
     .mem_write_out(ID_EX_MemWrite),
-    .alu_src_out(ID_EX_ALUSrc),
+    .alu_src_select_out(ID_EX_ALUSrc),
     .alu_control_out(ID_EX_ALUControl)
   );
 
-  // EX/MEM Pipeline Register Instance
+  // EX/MEM Pipeline Register Instance ✅
   ex_mem_reg ex_mem (
     .clk(clk),
     .reset(reset),
-    .wa_in(ID_EX_WA),
-    .reg_write_in(ID_EX_RegWrite),
-    .mem_write_in(ID_EX_MemWrite),
-    .reg_write_out(EX_MEM_RegWrite),
-    .mem_write_out(EX_MEM_MemWrite),
+    .reg_write_enable_in(ID_EX_RegWrite),
+    .mem_write_enable_in(ID_EX_MemWrite),
+    .reg_write_enable_out(EX_MEM_RegWrite),
+    .mem_write_enable_out(EX_MEM_MemWrite),
   );
 
-  // MEM/WB Pipeline Register Instance
+  // MEM/WB Pipeline Register Instance 
   mem_wb_reg mem_wb (
     .clk(clk),
     .reset(reset),
-    .reg_write_in(EX_MEM_RegWrite),
-    .mem_to_reg_in(EX_MEM_MemtoReg),
-    .reg_write_out(MEM_WB_RegWrite),
-    .mem_to_reg_out(MEM_WB_MemtoReg)
+    .reg_write_enable_in(EX_MEM_RegWrite),
+    .mem_to_reg_select_in(EX_MEM_MemtoReg),
+    .reg_write_enable_out(MEM_WB_RegWrite),
+    .mem_to_reg_select_out(MEM_WB_MemtoReg)
   );
 
   // Test stimulus
@@ -161,9 +158,9 @@ module arm_pipeline_tb;
     imem.memory[7] = 32'b11100000_10000000_01010001_10000011; // ADD R5,R0,R3,LSL #3
     imem.memory[8] = 32'b11100111_11010001_00100000_00000000; // LDRB R2,[R1,R0]
     imem.memory[9] = 32'b11100101_10001010_01010000_00000000; // STR R5,[R10,#0]
-    imem.memory[10] = 32'b00011010_11111111_11111111_11111101; // BNE -3
-    imem.memory[11] = 32'b00000000_00000000_00000000_00000000; // NOP
-    imem.memory[12] = 32'b00000000_00000000_00000000_00000000; // NOP
+    imem.memory[10] = 32'b00011010_11111111_11111111_11111101;// BNE -3
+    imem.memory[11] = 32'b00000000_00000000_00000000_00000000;// NOP
+    imem.memory[12] = 32'b00000000_00000000_00000000_00000000;// NOP
 
     // Initialize control signals
     reset = 1;
