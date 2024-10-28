@@ -169,10 +169,15 @@ module arm_pipeline_tb;
     reset = 1;
     IF_ID_Enable = 1;
     PC_enable = 1;
+    S_bit = 2'b00; // Initialize S_bit to 0
     
     // Wait for 3 clock cycles and release reset
     #3;
     reset = 0;
+
+    // Change S_bit to 1 at time 32
+    #29; // Wait until time 32
+    S_bit = 2'b01; // Set S_bit to 1
     
     // Monitor signals
     $display("\n=== Simulation Start ===");
