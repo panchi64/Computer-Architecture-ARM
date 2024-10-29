@@ -156,20 +156,9 @@ module arm_pipeline_tb;
   assign monitor_time = $time/2;
 
   initial begin
-    // Initialize instruction memory with the given program
-    imem.memory[0] = 32'b11100010_00010001_00000000_00000000; // ANDS R0,R1,#0
-    imem.memory[1] = 32'b11100000_10000000_01010001_10000011; // ADD R5,R0,R3,LSL #3
-    imem.memory[2] = 32'b11100111_11010001_00100000_00000000; // LDRB R2,[R1,R0]
-    imem.memory[3] = 32'b11100101_10001010_01010000_00000000; // STR R5,[R10,#0]
-    imem.memory[4] = 32'b00011010_11111111_11111111_11111101; // BNE -3
-    imem.memory[5] = 32'b11011011_00000000_00000000_00001001; // BLLE +9
-    imem.memory[6] = 32'b11100010_00000001_00000000_00000000; // AND R0,R1,#0
-    imem.memory[7] = 32'b11100000_10000000_01010001_10000011; // ADD R5,R0,R3,LSL #3
-    imem.memory[8] = 32'b11100111_11010001_00100000_00000000; // LDRB R2,[R1,R0]
-    imem.memory[9] = 32'b11100101_10001010_01010000_00000000; // STR R5,[R10,#0]
-    imem.memory[10] = 32'b00011010_11111111_11111111_11111101;// BNE -3
-    imem.memory[11] = 32'b00000000_00000000_00000000_00000000;// NOP
-    imem.memory[12] = 32'b00000000_00000000_00000000_00000000;// NOP
+    
+    // Initialize memory from inline binary string
+    $readmemb("memory-preload.txt", imem.memory);
 
     // Initialize control signals
     reset = 1;
@@ -209,9 +198,13 @@ end
 
 always @(instruction) begin
     case(instruction)
-        32'b11100010_00010001_00000000_00000000: begin 
+        32'b11100010_00010001_00000000_00000000: begin  // First instruction
             instruction_keyword = "ANDS";
             $strobe("Decoded: ANDS R0,R1,#0");
+        end
+        32'b11100010_00000001_00000000_00000000: begin  // Seventh instruction
+            instruction_keyword = "AND ";
+            $strobe("Decoded: AND R0,R1,#0");
         end
         32'b11100000_10000000_01010001_10000011: begin
             instruction_keyword = "ADD ";
@@ -243,5 +236,4 @@ always @(instruction) begin
         end
     endcase
 end
-
 endmodule

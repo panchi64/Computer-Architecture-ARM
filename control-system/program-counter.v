@@ -9,7 +9,7 @@ module program_counter(
     // Rising edge triggered with synchronous reset
     always @(posedge clk) begin
         if (reset)
-            pc_current <= 32'b0;     // Reset to address 0
+            pc_current <= 32'b0;    // Reset to address 0
         else if (enable)            // Only update when enabled
             pc_current <= pc_next;  // Update to next instruction address
     end
