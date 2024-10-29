@@ -177,7 +177,7 @@ module arm_pipeline_tb;
     $display("    Memory Write Enable (MemWrite)        = %b", MemWrite);
     $display("    Memory to Register (MemtoReg)         = %b", MemtoReg);
     $display("    ALU Source Select (ALUSrc)            = %b", ALUSrc);
-    $display("    Status Bits                           = %b", S_bit_forced);
+    $display("    Status Bits                           = %b", S_bit_muxed);
     $display("    ALU Operation                         = %b", ALUControl);
     $display("    PC Source Select (Branch)             = %b", PCSrc);
     
