@@ -185,23 +185,23 @@ module arm_pipeline_tb;
     #3;
     reset = 0;
 
-    // Change S_bit to 1 at time 32
-    #29; // Wait until time 32
+    // Wait until time 32 (29 more units after reset at time 3)
+    #29;
     S_bit_forced = 2'b01; // Set S_bit to 1
-
-    // Simple monitoring format
-    $strobe("\nTime: %0d", monitor_time);
-    $strobe("Instruction at Control Unit: %0s", instruction_keyword);
-    $strobe("PC: %0d, Control Signals: RegWrite=%b MemWrite=%b MemtoReg=%b ALUSrc=%b Status=%b ALUOp=%b PCSrc=%b",
+    
+    $monitor("\nTime: %0d\nInstruction: %s\nPC: %0d | CU: RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b Status=%b ALUOp=%b PCSrc=%b\nEX:  RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b ALUOp=%b\nMEM: RegW=%b MemW=%b\nWB:  RegW=%b Mem2Reg=%b\n----------------------------------------",
+        monitor_time,
+        instruction_keyword,
         PC_current,
-        RegWrite, MemWrite, MemtoReg, ALUSrc, S_bit_forced, ALUControl, PCSrc);
-    $strobe("EX Stage Control: RegWrite=%b MemWrite=%b MemtoReg=%b ALUSrc=%b ALUOp=%b",
-        ID_EX_RegWrite, ID_EX_MemWrite, ID_EX_MemtoReg, ID_EX_ALUSrc, ID_EX_ALUControl);
-    $strobe("MEM Stage Control: RegWrite=%b MemWrite=%b",
-        EX_MEM_RegWrite, EX_MEM_MemWrite);
-    $strobe("WB Stage Control: RegWrite=%b MemtoReg=%b",
-        MEM_WB_RegWrite, MEM_WB_MemtoReg);
-    $strobe("----------------");
+        // Control Unit outputs
+        RegWrite, MemWrite, MemtoReg, ALUSrc, S_bit_ctrl, ALUControl, PCSrc,
+        // EX Stage
+        ID_EX_RegWrite, ID_EX_MemWrite, ID_EX_MemtoReg, ID_EX_ALUSrc, ID_EX_ALUControl,
+        // MEM Stage
+        EX_MEM_RegWrite, EX_MEM_MemWrite,
+        // WB Stage
+        MEM_WB_RegWrite, MEM_WB_MemtoReg
+    );
 
     #40;
     $finish;
@@ -211,35 +211,35 @@ always @(instruction) begin
     case(instruction)
         32'b11100010_00010001_00000000_00000000: begin 
             instruction_keyword = "ANDS";
-            $display("Decode: ANDS R0,R1,#0");
+            $strobe("Decoded: ANDS R0,R1,#0");
         end
         32'b11100000_10000000_01010001_10000011: begin
             instruction_keyword = "ADD ";
-            $display("Decode: ADD R5,R0,R3,LSL #3");
+            $strobe("Decoded: ADD R5,R0,R3,LSL #3");
         end
         32'b11100111_11010001_00100000_00000000: begin
             instruction_keyword = "LDRB";
-            $display("Decode: LDRB R2,[R1,R0]");
+            $strobe("Decoded: LDRB R2,[R1,R0]");
         end
         32'b11100101_10001010_01010000_00000000: begin
             instruction_keyword = "STR ";
-            $display("Decode: STR R5,[R10,#0]");
+            $strobe("Decoded: STR R5,[R10,#0]");
         end
         32'b00011010_11111111_11111111_11111101: begin
             instruction_keyword = "BNE ";
-            $display("Decode: BNE -3");
+            $strobe("Decoded: BNE -3");
         end
         32'b11011011_00000000_00000000_00001001: begin
             instruction_keyword = "BLLE";
-            $display("Decode: BLLE +9");
+            $strobe("Decoded: BLLE +9");
         end
         32'b00000000_00000000_00000000_00000000: begin
             instruction_keyword = "NOP ";
-            $display("Decode: NOP");
+            $strobe("Decoded: NOP");
         end
         default: begin
             instruction_keyword = "UNK ";
-            $display("Decode: Unknown Instruction");
+            $strobe("Decoded: Unknown Instruction");
         end
     endcase
 end
