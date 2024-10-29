@@ -166,9 +166,10 @@ module arm_pipeline_tb;
         $display("======= Simulation Start =======\n");
     end
     
-    $display("Time: %0d", monitor_time);
+    $display("Clock: %0d", monitor_time);
     $display("Instruction: %s", instruction_keyword);
     $display("Program Counter: %0d", PC_current);
+    $display("Reset: %0b", reset);
     
     // Control Unit signals with descriptions
     $display("Control Unit Signals:");
