@@ -157,23 +157,48 @@ module arm_pipeline_tb;
 
   // Update the time on each clock
   always @(clk) begin
-      monitor_time = $time;
+    monitor_time = $time;
 
-      decode_instruction(IF_ID_Instr); // Decode instruction in ID stage
+    decode_instruction(IF_ID_Instr); // Decode instruction in ID stage
     
-    $display("\nTime: %0d\nInstruction: %s\nPC: %0d | CU: RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b Status=%b ALUOp=%b PCSrc=%b\nEX:  RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b ALUOp=%b\nMEM: RegW=%b MemW=%b\nWB:  RegW=%b Mem2Reg=%b\n----------------------------------------",
-        monitor_time,
-        instruction_keyword,
-        PC_current,
-        // Control Unit outputs
-        RegWrite, MemWrite, MemtoReg, ALUSrc, S_bit_ctrl, ALUControl, PCSrc,
-        // EX Stage
-        ID_EX_RegWrite, ID_EX_MemWrite, ID_EX_MemtoReg, ID_EX_ALUSrc, ID_EX_ALUControl,
-        // MEM Stage
-        EX_MEM_RegWrite, EX_MEM_MemWrite,
-        // WB Stage
-        MEM_WB_RegWrite, MEM_WB_MemtoReg
-    );
+    // Print header if time is 0
+    if (monitor_time == 0) begin
+        $display("======= Simulation Start =======\n");
+    end
+    
+    $display("Time: %0d", monitor_time);
+    $display("Instruction: %s", instruction_keyword);
+    $display("Program Counter: %0d", PC_current);
+    
+    // Control Unit signals with descriptions
+    $display("Control Unit Signals:");
+    $display("    Register File Write Enable (RegWrite) = %b", RegWrite);
+    $display("    Memory Write Enable (MemWrite)        = %b", MemWrite);
+    $display("    Memory to Register (MemtoReg)         = %b", MemtoReg);
+    $display("    ALU Source Select (ALUSrc)            = %b", ALUSrc);
+    $display("    Status Bits                           = %b", S_bit_ctrl);
+    $display("    ALU Operation                         = %b", ALUControl);
+    $display("    PC Source Select (Branch)             = %b", PCSrc);
+    
+    // EX Stage signals
+    $display("Execute Stage Signals:");
+    $display("    Register File Write Enable (RegWrite) = %b", ID_EX_RegWrite);
+    $display("    Memory Write Enable (MemWrite)        = %b", ID_EX_MemWrite);
+    $display("    Memory to Register (MemtoReg)         = %b", ID_EX_MemtoReg);
+    $display("    ALU Source Select (ALUSrc)            = %b", ID_EX_ALUSrc);
+    $display("    ALU Operation                         = %b", ID_EX_ALUControl);
+    
+    // MEM Stage signals
+    $display("Memory Stage Signals:");
+    $display("    Register File Write Enable (RegWrite) = %b", EX_MEM_RegWrite);
+    $display("    Memory Write Enable (MemWrite)        = %b", EX_MEM_MemWrite);
+    
+    // WB Stage signals
+    $display("Write Back Stage Signals:");
+    $display("    Register File Write Enable (RegWrite) = %b", MEM_WB_RegWrite);
+    $display("    Memory to Register (MemtoReg)         = %b", MEM_WB_MemtoReg);
+    
+    $display("\n----------------------------------------\n");
   end
 
   // Add this task before the initial block
@@ -224,8 +249,6 @@ module arm_pipeline_tb;
     cycle_count = 0;
     S_bit_forced = 2'b00; // Initialize S_bit to 0
     instruction_keyword = "UNK"; // Initialize instruction keyword
-    
-    $display("\n=== Simulation Start ===\n");
     
     // Wait 3 cycles then release reset
     #3;
