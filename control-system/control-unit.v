@@ -43,19 +43,28 @@ module control_unit (
                 case (instruction[24:21])  // Checking specific opcode bits
                     4'b0001: begin  // ANDS
                         reg_write_enable = 1;
-                        alu_operation = ALU_AND;
-                        status_bits = 2'b11;  // Update status flags
+                        alu_operation = ALU_AND;      // Changed from ALU_ADD to ALU_AND
+                        status_bits = 2'b11;          // Set status bits for ANDS
                         alu_source_select = immediate_flag;
                     end
-                    4'b0000: begin  // ADD
+                    4'b0000: begin  // AND
+                        reg_write_enable = 1;
+                        alu_operation = ALU_AND;      // Changed from ALU_ADD to ALU_AND
+                        status_bits = 2'b00;          // No status update for AND
+                        alu_source_select = immediate_flag;
+                    end
+                    4'b0100: begin  // ADD
                         reg_write_enable = 1;
                         alu_operation = ALU_ADD;
-                        alu_source_select = 0;  // Use register value
+                        status_bits = 2'b00;
+                        alu_source_select = immediate_flag;
                     end
                     default: begin
                         // Default data processing
                         reg_write_enable = 1;
                         alu_operation = ALU_ADD;
+                        status_bits = 2'b00;
+                        alu_source_select = immediate_flag;
                     end
                 endcase
             end
