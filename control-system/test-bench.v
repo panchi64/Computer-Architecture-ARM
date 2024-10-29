@@ -25,7 +25,8 @@ module arm_pipeline_tb;
   wire MemWrite;              // Memory write enable
   wire MemtoReg;              // Select between ALU result and memory data
   wire ALUSrc;                // Select between register and immediate
-  wire [1:0] S_bit;           // Register source selection
+  wire [1:0] S_bit_ctrl;      // Register source selection from control unit
+  reg  [1:0] S_bit_forced;    // Testbench forced value
   wire [1:0] ALUControl;      // ALU operation control
   wire PCSrc;                 // PC source selection for branches
   
@@ -47,9 +48,11 @@ module arm_pipeline_tb;
   // Pipeline Register Enable Signals
   reg IF_ID_Enable;               // IF/ID register enable
 
-  wire [1:0] S_bit_muxed;        // Muxed status bits
-  wire [1:0] ALUControl_muxed;   // Muxed ALU control
-  wire MemtoReg_muxed;           // Muxed memory to register select
+  wire [1:0] S_bit_muxed;         // Muxed status bits
+  wire [1:0] ALUControl_muxed;    // Muxed ALU control
+  wire MemtoReg_muxed;            // Muxed memory to register select
+ 
+  reg [31:0] instruction_keyword; // For storing instruction text
 
   // Instruction Memory Instance ✅
   instruction_memory imem (
@@ -80,19 +83,18 @@ module arm_pipeline_tb;
     .mem_write_enable(MemWrite),
     .mem_to_reg_select(MemtoReg),
     .alu_source_select(ALUSrc),
-    .status_bits(S_bit),
+    .status_bits(S_bit_ctrl),
     .alu_operation(ALUControl),
     .pc_source_select(PCSrc)
-  );
+);
 
   // Control Unit Multiplexer Instance ✅
-  // Control Unit Multiplexer Instance
   cu_mux control_mux (
     .reg_write_enable_in(RegWrite),
     .mem_write_enable_in(MemWrite),
     .mem_to_reg_select_in(MemtoReg),
     .alu_src_in(ALUSrc),
-    .status_bits_in(S_bit),
+    .status_bits_in(S_bit_forced),
     .alu_control_in(ALUControl),
     .pc_src_select_in(PCSrc),
     .reg_write_enable_out(RegWrite_muxed),
@@ -174,9 +176,10 @@ module arm_pipeline_tb;
     IF_ID_Enable = 1;
     PC_enable = 1;
     cycle_count = 0;
+    S_bit_forced = 2'b00; // Initialize S_bit to 0
+    instruction_keyword = "UNK"; // Initialize instruction keyword
     
     $display("\n=== Simulation Start ===\n");
-    S_bit = 2'b00; // Initialize S_bit to 0
     
     // Wait 3 cycles then release reset
     #3;
@@ -184,42 +187,60 @@ module arm_pipeline_tb;
 
     // Change S_bit to 1 at time 32
     #29; // Wait until time 32
-    S_bit = 2'b01; // Set S_bit to 1
+    S_bit_forced = 2'b01; // Set S_bit to 1
 
     // Simple monitoring format
-    $monitor("\nCycle: %d\nPC: %h\nInstruction: %h\nControl: PCSrc=%b RegWrite=%b MemWrite=%b ALUOp=%b\n----------------",
-        monitor_time,
+    $strobe("\nTime: %0d", monitor_time);
+    $strobe("Instruction at Control Unit: %0s", instruction_keyword);
+    $strobe("PC: %0d, Control Signals: RegWrite=%b MemWrite=%b MemtoReg=%b ALUSrc=%b Status=%b ALUOp=%b PCSrc=%b",
         PC_current,
-        instruction,
-        PCSrc,
-        RegWrite,
-        MemWrite,
-        ALUControl
-    );
+        RegWrite, MemWrite, MemtoReg, ALUSrc, S_bit_forced, ALUControl, PCSrc);
+    $strobe("EX Stage Control: RegWrite=%b MemWrite=%b MemtoReg=%b ALUSrc=%b ALUOp=%b",
+        ID_EX_RegWrite, ID_EX_MemWrite, ID_EX_MemtoReg, ID_EX_ALUSrc, ID_EX_ALUControl);
+    $strobe("MEM Stage Control: RegWrite=%b MemWrite=%b",
+        EX_MEM_RegWrite, EX_MEM_MemWrite);
+    $strobe("WB Stage Control: RegWrite=%b MemtoReg=%b",
+        MEM_WB_RegWrite, MEM_WB_MemtoReg);
+    $strobe("----------------");
 
     #40;
     $finish;
 end
 
-// Add instruction decoder
 always @(instruction) begin
     case(instruction)
-        32'b11100010_00010001_00000000_00000000: 
+        32'b11100010_00010001_00000000_00000000: begin 
+            instruction_keyword = "ANDS";
             $display("Decode: ANDS R0,R1,#0");
-        32'b11100000_10000000_01010001_10000011:
+        end
+        32'b11100000_10000000_01010001_10000011: begin
+            instruction_keyword = "ADD ";
             $display("Decode: ADD R5,R0,R3,LSL #3");
-        32'b11100111_11010001_00100000_00000000:
+        end
+        32'b11100111_11010001_00100000_00000000: begin
+            instruction_keyword = "LDRB";
             $display("Decode: LDRB R2,[R1,R0]");
-        32'b11100101_10001010_01010000_00000000:
+        end
+        32'b11100101_10001010_01010000_00000000: begin
+            instruction_keyword = "STR ";
             $display("Decode: STR R5,[R10,#0]");
-        32'b00011010_11111111_11111111_11111101:
+        end
+        32'b00011010_11111111_11111111_11111101: begin
+            instruction_keyword = "BNE ";
             $display("Decode: BNE -3");
-        32'b11011011_00000000_00000000_00001001:
+        end
+        32'b11011011_00000000_00000000_00001001: begin
+            instruction_keyword = "BLLE";
             $display("Decode: BLLE +9");
-        32'b00000000_00000000_00000000_00000000:
+        end
+        32'b00000000_00000000_00000000_00000000: begin
+            instruction_keyword = "NOP ";
             $display("Decode: NOP");
-        default: 
+        end
+        default: begin
+            instruction_keyword = "UNK ";
             $display("Decode: Unknown Instruction");
+        end
     endcase
 end
 
