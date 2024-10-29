@@ -58,7 +58,7 @@ module arm_pipeline_tb;
   instruction_memory imem (
     .address(PC_current[7:0]),
     .instruction(instruction)
-);
+  );
 
   // Program Counter Register Instance ✅
   program_counter pc_reg (
@@ -67,7 +67,7 @@ module arm_pipeline_tb;
     .enable(PC_enable),
     .pc_next(PC_plus_4),
     .pc_current(PC_current)
-);
+  );
 
   // IF Stage Adder Instance ✅
   adder if_adder (
@@ -86,7 +86,7 @@ module arm_pipeline_tb;
     .status_bits(S_bit_ctrl),
     .alu_operation(ALUControl),
     .pc_source_select(PCSrc)
-);
+  );
 
   // Control Unit Multiplexer Instance ✅
   cu_mux control_mux (
@@ -104,7 +104,7 @@ module arm_pipeline_tb;
     .status_bits_out(S_bit_muxed),    
     .alu_control_out(ALUControl_muxed),
     .pc_src_select_out(PCSrc_muxed)
-);
+  );
 
   // IF/ID Pipeline Register Instance ✅
   if_id_reg if_id (
@@ -129,7 +129,7 @@ module arm_pipeline_tb;
     .mem_to_reg_select_out(ID_EX_MemtoReg),
     .alu_src_select_out(ID_EX_ALUSrc),
     .alu_control_out(ID_EX_ALUControl)
-);
+  );
 
   // EX/MEM Pipeline Register Instance ✅
   ex_mem_reg ex_mem (
@@ -151,9 +151,66 @@ module arm_pipeline_tb;
     .mem_to_reg_select_out(MEM_WB_MemtoReg)
   );
 
+  // Time calculation
   reg [31:0] cycle_count;
-  wire [63:0] monitor_time;
-  assign monitor_time = $time/2;
+  integer monitor_time;
+
+  // Update the time on each clock
+  always @(clk) begin
+      monitor_time = $time;
+
+      decode_instruction(IF_ID_Instr); // Decode instruction in ID stage
+    
+    $display("\nTime: %0d\nInstruction: %s\nPC: %0d | CU: RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b Status=%b ALUOp=%b PCSrc=%b\nEX:  RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b ALUOp=%b\nMEM: RegW=%b MemW=%b\nWB:  RegW=%b Mem2Reg=%b\n----------------------------------------",
+        monitor_time,
+        instruction_keyword,
+        PC_current,
+        // Control Unit outputs
+        RegWrite, MemWrite, MemtoReg, ALUSrc, S_bit_ctrl, ALUControl, PCSrc,
+        // EX Stage
+        ID_EX_RegWrite, ID_EX_MemWrite, ID_EX_MemtoReg, ID_EX_ALUSrc, ID_EX_ALUControl,
+        // MEM Stage
+        EX_MEM_RegWrite, EX_MEM_MemWrite,
+        // WB Stage
+        MEM_WB_RegWrite, MEM_WB_MemtoReg
+    );
+  end
+
+  // Add this task before the initial block
+  task decode_instruction;
+    input [31:0] instr;
+    begin
+        case(instr)
+            32'b11100010_00010001_00000000_00000000: begin
+                instruction_keyword = "ANDS";
+            end
+            32'b11100010_00000001_00000000_00000000: begin
+                instruction_keyword = "AND ";
+            end
+            32'b11100000_10000000_01010001_10000011: begin
+                instruction_keyword = "ADD ";
+            end
+            32'b11100111_11010001_00100000_00000000: begin
+                instruction_keyword = "LDRB";
+            end
+            32'b11100101_10001010_01010000_00000000: begin
+                instruction_keyword = "STR ";
+            end
+            32'b00011010_11111111_11111111_11111101: begin
+                instruction_keyword = "BNE ";
+            end
+            32'b11011011_00000000_00000000_00001001: begin
+                instruction_keyword = "BLLE";
+            end
+            32'b00000000_00000000_00000000_00000000: begin
+                instruction_keyword = "NOP ";
+            end
+            default: begin
+                instruction_keyword = "UNK ";
+            end
+        endcase
+    end
+  endtask
 
   initial begin
     
@@ -178,62 +235,7 @@ module arm_pipeline_tb;
     #29;
     S_bit_forced = 2'b01; // Set S_bit to 1
     
-    $monitor("\nTime: %0d\nInstruction: %s\nPC: %0d | CU: RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b Status=%b ALUOp=%b PCSrc=%b\nEX:  RegW=%b MemW=%b Mem2Reg=%b ALUSrc=%b ALUOp=%b\nMEM: RegW=%b MemW=%b\nWB:  RegW=%b Mem2Reg=%b\n----------------------------------------",
-        monitor_time,
-        instruction_keyword,
-        PC_current,
-        // Control Unit outputs
-        RegWrite, MemWrite, MemtoReg, ALUSrc, S_bit_ctrl, ALUControl, PCSrc,
-        // EX Stage
-        ID_EX_RegWrite, ID_EX_MemWrite, ID_EX_MemtoReg, ID_EX_ALUSrc, ID_EX_ALUControl,
-        // MEM Stage
-        EX_MEM_RegWrite, EX_MEM_MemWrite,
-        // WB Stage
-        MEM_WB_RegWrite, MEM_WB_MemtoReg
-    );
-
-    #40;
+    #8;
     $finish;
-end
-
-always @(instruction) begin
-    case(instruction)
-        32'b11100010_00010001_00000000_00000000: begin  // First instruction
-            instruction_keyword = "ANDS";
-            $strobe("Decoded: ANDS R0,R1,#0");
-        end
-        32'b11100010_00000001_00000000_00000000: begin  // Seventh instruction
-            instruction_keyword = "AND ";
-            $strobe("Decoded: AND R0,R1,#0");
-        end
-        32'b11100000_10000000_01010001_10000011: begin
-            instruction_keyword = "ADD ";
-            $strobe("Decoded: ADD R5,R0,R3,LSL #3");
-        end
-        32'b11100111_11010001_00100000_00000000: begin
-            instruction_keyword = "LDRB";
-            $strobe("Decoded: LDRB R2,[R1,R0]");
-        end
-        32'b11100101_10001010_01010000_00000000: begin
-            instruction_keyword = "STR ";
-            $strobe("Decoded: STR R5,[R10,#0]");
-        end
-        32'b00011010_11111111_11111111_11111101: begin
-            instruction_keyword = "BNE ";
-            $strobe("Decoded: BNE -3");
-        end
-        32'b11011011_00000000_00000000_00001001: begin
-            instruction_keyword = "BLLE";
-            $strobe("Decoded: BLLE +9");
-        end
-        32'b00000000_00000000_00000000_00000000: begin
-            instruction_keyword = "NOP ";
-            $strobe("Decoded: NOP");
-        end
-        default: begin
-            instruction_keyword = "UNK ";
-            $strobe("Decoded: Unknown Instruction");
-        end
-    endcase
-end
+  end
 endmodule
