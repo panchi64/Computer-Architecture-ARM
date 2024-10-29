@@ -18,24 +18,9 @@ module cu_mux (
     output reg pc_src_select_out       // PC source select output
 );
 
-    // Control hazard signal
-    reg control_hazard;
-
     always @(*) begin
-        // Check for control hazards
-        control_hazard = 0; // Default: no hazard
-
-        if (control_hazard) begin
-            // If hazard detected, clear all control signals
-            reg_write_enable_out = 0;
-            mem_write_enable_out = 0;
-            mem_to_reg_select_out = 0;
-            alu_src_select_out = 0;
-            status_bits_out = 2'b00;
-            alu_control_out = 2'b00;
-            pc_src_select_out = 0;
-        end else begin
-            // If no hazard, pass through all control signals
+        if (status_bits_in[0]) begin
+            // If S_bit, pass through all control signals
             reg_write_enable_out = reg_write_enable_in;
             mem_write_enable_out = mem_write_enable_in;
             mem_to_reg_select_out = mem_to_reg_select_in;
@@ -43,6 +28,15 @@ module cu_mux (
             status_bits_out = status_bits_in;
             alu_control_out = alu_control_in;
             pc_src_select_out = pc_src_select_in;
+        end else begin
+            // If no S_bit, clear all control signals
+            reg_write_enable_out = 0;
+            mem_write_enable_out = 0;
+            mem_to_reg_select_out = 0;
+            alu_src_select_out = 0;
+            status_bits_out = 2'b00;
+            alu_control_out = 2'b00;
+            pc_src_select_out = 0;
         end
     end
 
