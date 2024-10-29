@@ -152,7 +152,6 @@ module arm_pipeline_tb;
   );
 
   // Time calculation
-  reg [31:0] cycle_count;
   integer monitor_time;
 
   // Update the time on each clock
@@ -247,7 +246,6 @@ module arm_pipeline_tb;
     reset = 1;
     IF_ID_Enable = 1;
     PC_enable = 1;
-    cycle_count = 0;
     S_bit_forced = 2'b00; // Initialize S_bit to 0
     instruction_keyword = "UNK"; // Initialize instruction keyword
     
