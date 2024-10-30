@@ -138,8 +138,10 @@ module arm_pipeline_tb;
     .reset(reset),
     .reg_write_enable_in(ID_EX_RegWrite),
     .mem_write_enable_in(ID_EX_MemWrite),
+    .mem_to_reg_select_in(ID_EX_MemtoReg),
     .reg_write_enable_out(EX_MEM_RegWrite),
-    .mem_write_enable_out(EX_MEM_MemWrite)
+    .mem_write_enable_out(EX_MEM_MemWrite),
+    .mem_to_reg_select_out(EX_MEM_MemtoReg)
   );
 
   // MEM/WB Pipeline Register Instance ✅
@@ -177,7 +179,7 @@ module arm_pipeline_tb;
     $display("    Memory Write Enable (MemWrite)        = %b", MemWrite);
     $display("    Memory to Register (MemtoReg)         = %b", MemtoReg);
     $display("    ALU Source Select (ALUSrc)            = %b", ALUSrc);
-    $display("    Status Bits                           = %b", S_bit_ctrl);
+    $display("    Status Bits                           = %b", S_bit_muxed);
     $display("    ALU Operation                         = %b", ALUControl);
     $display("    PC Source Select (Branch)             = %b", PCSrc);
     $display("    MUX Source Select                     = %b", S_bit_mux);
@@ -194,6 +196,7 @@ module arm_pipeline_tb;
     $display("Memory Stage Signals:");
     $display("    Register File Write Enable (RegWrite) = %b", EX_MEM_RegWrite);
     $display("    Memory Write Enable (MemWrite)        = %b", EX_MEM_MemWrite);
+    $display("    Memory to Register (MemtoReg)         = %b", EX_MEM_MemtoReg);
     
     // WB Stage signals
     $display("Write Back Stage Signals:");
