@@ -89,7 +89,7 @@ module arm_pipeline_tb;
     .reg_write_enable(RegWrite),
     .mem_write_enable(MemWrite),
     .mem_to_reg_select(MemtoReg),
-    .alu_source_select(ALUSrc),
+    .alu_source_select(S_bit_ctrl),
     .status_bit(S_bit_ctrl),
     .alu_operation(ALUControl),
     .pc_source_select(PCSrc)
@@ -100,7 +100,7 @@ module arm_pipeline_tb;
     .reg_write_enable_in(RegWrite),
     .mem_write_enable_in(MemWrite),
     .mem_to_reg_select_in(MemtoReg),
-    .alu_src_in(ALUSrc),
+    .alu_src_in(S_bit_ctrl),
     .status_bit_in(S_bit_ctrl),
     .alu_control_in(ALUControl),
     .pc_src_select_in(PCSrc),
@@ -201,18 +201,17 @@ module arm_pipeline_tb;
     $display("    Register File Write Enable = %b", RegWrite);
     $display("    Memory Write Enable        = %b", MemWrite);
     $display("    Memory to Register Select  = %b", MemtoReg);
-    $display("    ALU Source Select          = %b", ALUSrc);
     $display("    ALU Operation              = %b", ALUControl);
     $display("    PC Source Select (Branch)  = %b", PCSrc);
     $display("    Status Bit Generation      = %b", S_bit_ctrl);
-    $display("    MUX Source Select          = %b\n", S_bit_mux);
+    $display("    CU-MUX Source Select       = %b\n", S_bit_mux);
     
     // Execute Stage signals
     $display("Execute Stage Signals:");
     $display("    Register File Write Enable = %b", ID_EX_RegWrite);
     $display("    Memory Write Enable        = %b", ID_EX_MemWrite);
     $display("    Memory to Register Select  = %b", ID_EX_MemtoReg);
-    $display("    ALU Source Select          = %b", ID_EX_ALUSrc);
+    $display("    Status Bit                 = %b", ID_EX_ALUSrc);
     $display("    ALU Operation              = %b\n", ID_EX_ALUControl);
     
     // Memory Stage signals
