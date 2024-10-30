@@ -6,6 +6,10 @@ module program_counter(
     output reg [31:0] pc_current // Current PC value
 );
 
+    initial begin
+        pc_current = 32'b0;
+    end    
+
     // Rising edge triggered with synchronous reset
     always @(posedge clk) begin
         if (reset)

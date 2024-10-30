@@ -19,6 +19,14 @@ module id_ex_reg (
     output reg status_bits_out
 );
 
+    initial begin
+        reg_write_enable_out = 1'b0;
+        mem_write_enable_out = 1'b0;
+        mem_to_reg_select_out = 1'b0;
+        alu_src_select_out = 1'b0;
+        alu_control_out = 2'b00;
+    end
+
     always @(posedge clk) begin
         if (reset) begin
             // Reset all control signals

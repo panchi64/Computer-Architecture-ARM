@@ -19,6 +19,16 @@ module cu_mux (
     output reg pc_src_select_out       // PC source select output
 );
 
+    initial begin
+        reg_write_enable_out = 0;
+        mem_write_enable_out = 0;
+        mem_to_reg_select_out = 0;
+        alu_src_select_out = 0;
+        status_bits_out = 2'b00;
+        alu_control_out = 2'b00;
+        pc_src_select_out = 0;
+    end
+
     always @(*) begin
         if (mux_select) begin
             // If S_bit, pass through all control signals

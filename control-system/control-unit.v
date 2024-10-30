@@ -29,6 +29,16 @@ module control_unit (
     localparam ALU_SUB = 2'b10;
     localparam ALU_LSL = 2'b11;  // Logical shift left
 
+    initial begin
+        reg_write_enable = 0;
+        mem_write_enable = 0;
+        mem_to_reg_select = 0;
+        alu_source_select = 0;
+        status_bit = 0;
+        alu_operation = 2'b00;
+        pc_source_select = 0;
+    end
+
     always @(*) begin
         // Default values
         reg_write_enable = 0;
@@ -100,7 +110,7 @@ module control_unit (
             mem_to_reg_select = 0;
             alu_source_select = 0;
             status_bit = 0;
-            alu_operation = ALU_ADD;
+            alu_operation = ALU_AND;  // Set to default ALU_AND (00) for NOP
             pc_source_select = 0;
         end
     end

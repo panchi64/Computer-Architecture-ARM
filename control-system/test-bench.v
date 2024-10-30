@@ -242,27 +242,30 @@ module arm_pipeline_tb;
     end
   endtask
 
+  // Update in the test bench's initial block
   initial begin
-    
-    // Initialize memory from inline binary string
-    $readmemb("memory-preload.txt", imem.memory);
-
-    // Initialize control signals
-    reset = 1;
-    IF_ID_Enable = 1;
-    PC_enable = 1;
-    S_bit_mux = 2'b00; // Initialize S_bit to 0
-    instruction_keyword = "UNK"; // Initialize instruction keyword
-    
-    // Wait 3 cycles then release reset
-    #3;
-    reset = 0;
-
-    // Wait until time 32 (29 more units after reset at time 3)
-    #29;
-    S_bit_mux = 2'b01; // Set S_bit to 1
-    
-    #8;
-    $finish;
+      // Initialize memory from inline binary string
+      $readmemb("memory-preload.txt", imem.memory);
+  
+      // Initialize control signals
+      reset = 1;
+      IF_ID_Enable = 1;
+      PC_enable = 1;
+      S_bit_mux = 2'b00; // Initialize S_bit to 0
+      instruction_keyword = "UNK"; // Initialize instruction keyword
+      
+      // Initialize all signals explicitly
+      #0; // Force initialization at time 0
+      
+      // Wait 3 cycles then release reset
+      #3;
+      reset = 0;
+  
+      // Wait until time 32 (29 more units after reset at time 3)
+      #29;
+      S_bit_mux = 2'b01; // Set S_bit to 1
+      
+      #8;
+      $finish;
   end
 endmodule
