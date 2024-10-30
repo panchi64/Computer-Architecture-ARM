@@ -30,7 +30,7 @@ module cu_mux (
     end
 
     always @(*) begin
-        if (mux_select) begin
+        if (!mux_select) begin
             // If S_bit, pass through all control signals
             reg_write_enable_out = reg_write_enable_in;
             mem_write_enable_out = mem_write_enable_in;

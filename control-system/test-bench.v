@@ -194,45 +194,37 @@ module arm_pipeline_tb;
     $display("Clock: %0d", monitor_time);
     $display("Instruction: %s", instruction_keyword);
     $display("Program Counter: %0d", PC_current);
-    $display("Reset: %0b", reset);
+    $display("Reset: %0b\n", reset);
     
-    // Control Unit signals with descriptions
-    $display("Control Unit Signals:");
-    $display("    Register File Write Enable (RegWrite) = %b", RegWrite);
-    $display("    Memory Write Enable (MemWrite)        = %b", MemWrite);
-    $display("    Memory to Register (MemtoReg)         = %b", MemtoReg);
-    $display("    ALU Source Select (ALUSrc)            = %b", ALUSrc);
-    $display("    Status Bits                           = %b", S_bit_muxed);
-    $display("    ALU Operation                         = %b", ALUControl);
-    $display("    PC Source Select (Branch)             = %b", PCSrc);
-    $display("    MUX Source Select                     = %b", S_bit_mux);
+    // Control Unit (ID Stage) signals
+    $display("Control Unit Signals (ID Stage):");
+    $display("    Register File Write Enable = %b", RegWrite);
+    $display("    Memory Write Enable        = %b", MemWrite);
+    $display("    Memory to Register Select  = %b", MemtoReg);
+    $display("    ALU Source Select          = %b", ALUSrc);
+    $display("    ALU Operation              = %b", ALUControl);
+    $display("    PC Source Select (Branch)  = %b", PCSrc);
+    $display("    Status Bit Generation      = %b", S_bit_ctrl);
+    $display("    MUX Source Select          = %b\n", S_bit_mux);
     
-    // EX Stage signals
+    // Execute Stage signals
     $display("Execute Stage Signals:");
-    $display("    Register File Write Enable (RegWrite) = %b", ID_EX_RegWrite);
-    $display("    Memory Write Enable (MemWrite)        = %b", ID_EX_MemWrite);
-    $display("    Memory to Register (MemtoReg)         = %b", ID_EX_MemtoReg);
-    $display("    ALU Source Select (ALUSrc)            = %b", ID_EX_ALUSrc);
-    $display("    ALU Operation                         = %b", ID_EX_ALUControl);
+    $display("    Register File Write Enable = %b", ID_EX_RegWrite);
+    $display("    Memory Write Enable        = %b", ID_EX_MemWrite);
+    $display("    Memory to Register Select  = %b", ID_EX_MemtoReg);
+    $display("    ALU Source Select          = %b", ID_EX_ALUSrc);
+    $display("    ALU Operation              = %b\n", ID_EX_ALUControl);
     
-    // MEM Stage signals
     // Memory Stage signals
     $display("Memory Stage Signals:");
-    $display("    Register File Write Enable (RegWrite) = %b", EX_MEM_RegWrite);
-    $display("    Memory Write Enable (MemWrite)        = %b", EX_MEM_MemWrite);
-    $display("    Memory to Register (MemtoReg)         = %b", EX_MEM_MemtoReg);
-    $display("    ALU Source Select (ALUSrc)            = %b", EX_MEM_ALUSrc);
-    $display("    ALU Operation                         = %b", EX_MEM_ALUControl);
-    $display("    Status Bits                           = %b", EX_MEM_Status);
+    $display("    Register File Write Enable = %b", EX_MEM_RegWrite);
+    $display("    Memory Write Enable        = %b", EX_MEM_MemWrite);
+    $display("    Memory to Register Select  = %b\n", EX_MEM_MemtoReg);
     
     // Write Back Stage signals
     $display("Write Back Stage Signals:");
-    $display("    Register File Write Enable (RegWrite) = %b", MEM_WB_RegWrite);
-    $display("    Memory Write Enable (MemWrite)        = %b", MEM_WB_MemWrite);
-    $display("    Memory to Register (MemtoReg)         = %b", MEM_WB_MemtoReg);
-    $display("    ALU Source Select (ALUSrc)            = %b", MEM_WB_ALUSrc);
-    $display("    ALU Operation                         = %b", MEM_WB_ALUControl);
-    $display("    Status Bits                           = %b", MEM_WB_Status);
+    $display("    Register File Write Enable = %b", MEM_WB_RegWrite);
+    $display("    Memory to Register Select  = %b", MEM_WB_MemtoReg);
     
     $display("\n----------------------------------------\n");
   end
