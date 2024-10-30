@@ -14,7 +14,7 @@ module cu_mux (
     output reg mem_write_enable_out,   // Memory write enable output
     output reg mem_to_reg_select_out,  // Memory to register select output
     output reg alu_src_select_out,     // ALU source select output
-    output reg [1:0] status_bits_out,  // Status bits output
+    output reg status_bits_out,  // Status bits output
     output reg [1:0] alu_control_out,  // ALU control output
     output reg pc_src_select_out       // PC source select output
 );
