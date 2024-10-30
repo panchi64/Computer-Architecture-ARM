@@ -25,8 +25,8 @@ module arm_pipeline_tb;
   wire MemWrite;              // Memory write enable
   wire MemtoReg;              // Select between ALU result and memory data
   wire ALUSrc;                // Select between register and immediate
-  wire [1:0] S_bit_ctrl;      // Register source selection from control unit
-  reg  [1:0] S_bit_forced;    // Testbench forced value
+  wire S_bit_ctrl;            // Register source selection from control unit
+  reg  S_bit_mux;             // Multiplexer Select bit
   wire [1:0] ALUControl;      // ALU operation control
   wire PCSrc;                 // PC source selection for branches
   
@@ -83,7 +83,7 @@ module arm_pipeline_tb;
     .mem_write_enable(MemWrite),
     .mem_to_reg_select(MemtoReg),
     .alu_source_select(ALUSrc),
-    .status_bits(S_bit_ctrl),
+    .status_bit(S_bit_ctrl),
     .alu_operation(ALUControl),
     .pc_source_select(PCSrc)
   );
@@ -94,9 +94,10 @@ module arm_pipeline_tb;
     .mem_write_enable_in(MemWrite),
     .mem_to_reg_select_in(MemtoReg),
     .alu_src_in(ALUSrc),
-    .status_bits_in(S_bit_forced),
+    .status_bit_in(S_bit_ctrl),
     .alu_control_in(ALUControl),
     .pc_src_select_in(PCSrc),
+    .mux_select(S_bit_mux),
     .reg_write_enable_out(RegWrite_muxed),
     .mem_write_enable_out(MemWrite_muxed),
     .mem_to_reg_select_out(MemtoReg_muxed),
@@ -176,9 +177,10 @@ module arm_pipeline_tb;
     $display("    Memory Write Enable (MemWrite)        = %b", MemWrite);
     $display("    Memory to Register (MemtoReg)         = %b", MemtoReg);
     $display("    ALU Source Select (ALUSrc)            = %b", ALUSrc);
-    $display("    Status Bits                           = %b", S_bit_muxed);
+    $display("    Status Bits                           = %b", S_bit_ctrl);
     $display("    ALU Operation                         = %b", ALUControl);
     $display("    PC Source Select (Branch)             = %b", PCSrc);
+    $display("    MUX Source Select                     = %b", S_bit_mux);
     
     // EX Stage signals
     $display("Execute Stage Signals:");
@@ -246,7 +248,7 @@ module arm_pipeline_tb;
     reset = 1;
     IF_ID_Enable = 1;
     PC_enable = 1;
-    S_bit_forced = 2'b00; // Initialize S_bit to 0
+    S_bit_mux = 2'b00; // Initialize S_bit to 0
     instruction_keyword = "UNK"; // Initialize instruction keyword
     
     // Wait 3 cycles then release reset
@@ -255,7 +257,7 @@ module arm_pipeline_tb;
 
     // Wait until time 32 (29 more units after reset at time 3)
     #29;
-    S_bit_forced = 2'b01; // Set S_bit to 1
+    S_bit_mux = 2'b01; // Set S_bit to 1
     
     #8;
     $finish;
