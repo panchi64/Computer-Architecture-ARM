@@ -191,10 +191,14 @@ module arm_pipeline_tb;
         $display("======= Simulation Start =======\n");
     end
     
+    $display("Instruction: %s\n", instruction_keyword);
+    
     $display("Clock: %0d", monitor_time);
-    $display("Instruction: %s", instruction_keyword);
-    $display("Program Counter: %0d", PC_current);
-    $display("Reset: %0b\n", reset);
+    $display("Program Counter: %0d\n", PC_current);
+    
+    $display("Reset: %0b", reset);
+    $display("Hazard bit (CU Mux): %b\n", S_bit_mux);
+
     
     // Control Unit (ID Stage) signals
     $display("Control Unit Signals (ID Stage):");
@@ -204,7 +208,6 @@ module arm_pipeline_tb;
     $display("    ID_ALU_op                  = %b", ALUControl);
     $display("    PC Source Select (Branch)  = %b", PCSrc);
     $display("    S_bit                      = %b", S_bit_ctrl);
-    $display("    Hazard bit (CU Mux)        = %b\n", S_bit_mux);
     
     // Execute Stage signals
     $display("Execute Stage Signals:");
