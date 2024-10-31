@@ -33,12 +33,16 @@ module arm_pipeline_tb;
   // EX Stage Signals
   wire ID_EX_RegWrite;        // Register write control in EX stage
   wire ID_EX_MemWrite;        // Memory write control in EX stage
+  wire ID_EX_mem_read_enable; // Memory read control in ID stage
+  wire ID_EX_mem_size;        // Memory size in ID stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
   wire [3:0] ID_EX_ALUControl;// ALU operation control in EX stage
   
   // MEM Stage Signals
   wire EX_MEM_RegWrite;           // Register write control in MEM stage
   wire EX_MEM_MemWrite;           // Memory write control in MEM stage
+  wire EX_MEM_mem_read_enable;    // Memory read control in EX stage
+  wire EX_MEM_mem_size;           // Memory size in EX stage
   wire EX_MEM_MemtoReg;           // Memory to register control in MEM stage
   wire [3:0] EX_MEM_ALUControl;
   wire EX_MEM_ALUSrc;
@@ -51,15 +55,19 @@ module arm_pipeline_tb;
   wire MEM_WB_ALUSrc;
   wire MEM_WB_Status;
   wire MEM_WB_MemWrite;
+  wire MEM_WB_mem_read_enable;     // Memory read control in MEM stage
+    wire MEM_WB_mem_size;          // Memory size in MEM stage
 
   // Pipeline Register Enable Signals
-  reg IF_ID_Enable;               // IF/ID register enable
+  reg IF_ID_Enable;                // IF/ID register enable
 
-  wire S_bit_muxed;               // Muxed status bits
-  wire [3:0] ALUControl_muxed;    // Muxed ALU control
-  wire MemtoReg_muxed;            // Muxed memory to register select
- 
-  reg [31:0] instruction_keyword; // For storing instruction text
+  wire S_bit_muxed;                // Muxed status bits
+  wire [3:0] ALUControl_muxed;     // Muxed ALU control
+  wire MemtoReg_muxed;             // Muxed memory to register select
+  wire mem_read_enable;            // Memory read enable from control unit
+    wire mem_size;                 // Memory size control
+
+  reg [31:0] instruction_keyword;  // For storing instruction text
 
   // Instruction Memory Instance ✅
   instruction_memory imem (
@@ -88,30 +96,37 @@ module arm_pipeline_tb;
     .instruction(IF_ID_Instr),
     .reg_write_enable(RegWrite),
     .mem_write_enable(MemWrite),
+    .mem_read_enable(mem_read_enable),    
     .mem_to_reg_select(MemtoReg),
-    .alu_source_select(S_bit_ctrl),
+    .alu_source_select(ALUSrc),
     .status_bit(S_bit_ctrl),
     .alu_operation(ALUControl),
-    .pc_source_select(PCSrc)
+    .pc_source_select(PCSrc),
+    .mem_size(mem_size)                   
   );
+
 
   // Control Unit Multiplexer Instance ✅
   cu_mux control_mux (
     .reg_write_enable_in(RegWrite),
     .mem_write_enable_in(MemWrite),
+    .mem_read_enable_in(mem_read_enable),  
     .mem_to_reg_select_in(MemtoReg),
-    .alu_src_in(S_bit_ctrl),
+    .alu_src_in(ALUSrc),
     .status_bit_in(S_bit_ctrl),
     .alu_control_in(ALUControl),
     .pc_src_select_in(PCSrc),
+    .mem_size_in(mem_size),               
     .mux_select(S_bit_mux),
     .reg_write_enable_out(RegWrite_muxed),
     .mem_write_enable_out(MemWrite_muxed),
+    .mem_read_enable_out(mem_read_enable_muxed),  
     .mem_to_reg_select_out(MemtoReg_muxed),
     .alu_src_select_out(ALUSrc_muxed),
-    .status_bits_out(S_bit_muxed),    
+    .status_bit_out(S_bit_muxed),
     .alu_control_out(ALUControl_muxed),
-    .pc_src_select_out(PCSrc_muxed)
+    .pc_src_select_out(PCSrc_muxed),
+    .mem_size_out(mem_size_muxed)         
   );
 
   // IF/ID Pipeline Register Instance ✅
@@ -129,16 +144,20 @@ module arm_pipeline_tb;
       .reset(reset),
       .reg_write_enable_in(RegWrite_muxed),
       .mem_write_enable_in(MemWrite_muxed),
+      .mem_read_enable_in(mem_read_enable_muxed),    
       .mem_to_reg_select_in(MemtoReg_muxed),
       .alu_src_select_in(ALUSrc_muxed),
       .alu_control_in(ALUControl_muxed),
-      .status_bits_in(S_bit_muxed),
+      .status_bit_in(S_bit_muxed),
+      .mem_size_in(mem_size_muxed),                 
       .reg_write_enable_out(ID_EX_RegWrite),
       .mem_write_enable_out(ID_EX_MemWrite),
+      .mem_read_enable_out(ID_EX_mem_read_enable),  
       .mem_to_reg_select_out(ID_EX_MemtoReg),
       .alu_src_select_out(ID_EX_ALUSrc),
       .alu_control_out(ID_EX_ALUControl),
-      .status_bits_out(ID_EX_Status)
+      .status_bit_out(ID_EX_Status),
+      .mem_size_out(ID_EX_mem_size)                 
   );
 
   // EX/MEM Pipeline Register Instance ✅
@@ -147,16 +166,20 @@ module arm_pipeline_tb;
       .reset(reset),
       .reg_write_enable_in(ID_EX_RegWrite),
       .mem_write_enable_in(ID_EX_MemWrite),
+      .mem_read_enable_in(ID_EX_mem_read_enable),   
       .mem_to_reg_select_in(ID_EX_MemtoReg),
       .alu_src_select_in(ID_EX_ALUSrc),
       .alu_control_in(ID_EX_ALUControl),
-      .status_bits_in(ID_EX_Status),
+      .status_bit_in(ID_EX_Status),
+      .mem_size_in(ID_EX_mem_size),                
       .reg_write_enable_out(EX_MEM_RegWrite),
       .mem_write_enable_out(EX_MEM_MemWrite),
+      .mem_read_enable_out(EX_MEM_mem_read_enable), 
       .mem_to_reg_select_out(EX_MEM_MemtoReg),
       .alu_src_select_out(EX_MEM_ALUSrc),
       .alu_control_out(EX_MEM_ALUControl),
-      .status_bits_out(EX_MEM_Status)
+      .status_bit_out(EX_MEM_Status),
+      .mem_size_out(EX_MEM_mem_size)               
   );
 
   // MEM/WB Pipeline Register Instance ✅
@@ -165,16 +188,20 @@ module arm_pipeline_tb;
       .reset(reset),
       .reg_write_enable_in(EX_MEM_RegWrite),
       .mem_write_enable_in(EX_MEM_MemWrite),
+      .mem_read_enable_in(EX_MEM_mem_read_enable),  
       .mem_to_reg_select_in(EX_MEM_MemtoReg),
       .alu_src_select_in(EX_MEM_ALUSrc),
       .alu_control_in(EX_MEM_ALUControl),
-      .status_bits_in(EX_MEM_Status),
+      .status_bit_in(EX_MEM_Status),
+      .mem_size_in(EX_MEM_mem_size),               
       .reg_write_enable_out(MEM_WB_RegWrite),
       .mem_write_enable_out(MEM_WB_MemWrite),
+      .mem_read_enable_out(MEM_WB_mem_read_enable), 
       .mem_to_reg_select_out(MEM_WB_MemtoReg),
       .alu_src_select_out(MEM_WB_ALUSrc),
       .alu_control_out(MEM_WB_ALUControl),
-      .status_bits_out(MEM_WB_Status)
+      .status_bit_out(MEM_WB_Status),
+      .mem_size_out(MEM_WB_mem_size)               
   );
 
   // Time calculation
@@ -191,41 +218,46 @@ module arm_pipeline_tb;
         $display("======= Simulation Start =======\n");
     end
     
-    $display("Instruction: %s\n", instruction_keyword);
-    
     $display("Clock: %0d", monitor_time);
     $display("Program Counter: %0d\n", PC_current);
-    
-    $display("Reset: %0b", reset);
-    $display("Hazard bit (CU Mux): %b\n", S_bit_mux);
 
+    $display("Instruction: %s", instruction_keyword);
+    $display("Reset: %0b", reset);
+    $display("Hazard Bit (CU MUX): %b\n", S_bit_mux);
     
     // Control Unit (ID Stage) signals
     $display("Control Unit Signals (ID Stage):");
-    $display("    ID_RF_enable               = %b", RegWrite);
-    $display("    MEM_Enable (DATA_MEM)      = %b", MemWrite);
-    $display("    ID_load_instr              = %b", MemtoReg);
-    $display("    ID_ALU_op                  = %b", ALUControl);
-    $display("    PC Source Select (Branch)  = %b", PCSrc);
-    $display("    S_bit                      = %b", S_bit_ctrl);
+    $display("    ID_RF_Enable               = %b", RegWrite_muxed);
+    $display("    MEM_Enable                 = %b", MemWrite_muxed);
+    $display("    MEM_RW                     = %b", mem_read_enable_muxed);
+    $display("    MEM_Size                   = %b", mem_size_muxed);
+    $display("    ID_load_instr              = %b", MemtoReg_muxed);
+    $display("    ID_ALU_Op                  = %b", ALUControl_muxed);
+    $display("    S_bit                      = %b\n", S_bit_muxed);
     
     // Execute Stage signals
     $display("Execute Stage Signals:");
-    $display("    ID_RF_enable               = %b", ID_EX_RegWrite);
-    $display("    MEM_Enable (DATA_MEM)      = %b", ID_EX_MemWrite);
+    $display("    ID_RF_Enable               = %b", ID_EX_RegWrite);
+    $display("    MEM_Enable                 = %b", ID_EX_MemWrite);
+    $display("    MEM_RW                     = %b", ID_EX_mem_read_enable);
+    $display("    MEM_Size                   = %b", ID_EX_mem_size);
     $display("    ID_load_instr              = %b", ID_EX_MemtoReg);
+    $display("    ID_ALU_Op                  = %b", ID_EX_ALUControl);
     $display("    S_bit                      = %b", ID_EX_ALUSrc);
-    $display("    ALU Operation              = %b\n", ID_EX_ALUControl);
+    $display("    B/BL                       = %b\n", PCSrc_muxed);
+    // $display(, ID_EX_);
     
     // Memory Stage signals
     $display("Memory Stage Signals:");
-    $display("    ID_RF_enable               = %b", EX_MEM_RegWrite);
-    $display("    MEM_Enable (DATA_MEM)      = %b", EX_MEM_MemWrite);
+    $display("    ID_RF_Enable               = %b", EX_MEM_RegWrite);
+    $display("    MEM_Enable                 = %b", EX_MEM_MemWrite);
+    $display("    MEM_RW                     = %b", EX_MEM_mem_read_enable);
+    $display("    MEM_Size                   = %b", EX_MEM_mem_size);
     $display("    ID_load_instr              = %b\n", EX_MEM_MemtoReg);
     
     // Write Back Stage signals
     $display("Write Back Stage Signals:");
-    $display("    ID_RF_enable               = %b", MEM_WB_RegWrite);
+    $display("    ID_RF_Enable               = %b", MEM_WB_RegWrite);
     
     $display("\n----------------------------------------\n");
   end
