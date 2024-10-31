@@ -22,7 +22,8 @@ module arm_pipeline_tb;
   
   // Control Unit Signals
   wire RegWrite;              // Register file write enable
-  wire MemWrite;              // Memory write enable
+  wire MemEnable;             // Memory write enable
+  wire MemRW;                 // Memory read enable from control unit
   wire MemtoReg;              // Select between ALU result and memory data
   wire ALUSrc;                // Select between register and immediate
   wire S_bit_ctrl;            // Register source selection from control unit
@@ -32,16 +33,16 @@ module arm_pipeline_tb;
   
   // EX Stage Signals
   wire ID_EX_RegWrite;        // Register write control in EX stage
-  wire ID_EX_MemWrite;        // Memory write control in EX stage
-  wire ID_EX_mem_read_enable; // Memory read control in ID stage
+  wire ID_EX_MemEnable;       // Memory write control in EX stage
+  wire ID_EX_MemRW;           // Memory read control in ID stage
   wire ID_EX_mem_size;        // Memory size in ID stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
   wire [3:0] ID_EX_ALUControl;// ALU operation control in EX stage
   
   // MEM Stage Signals
   wire EX_MEM_RegWrite;           // Register write control in MEM stage
-  wire EX_MEM_MemWrite;           // Memory write control in MEM stage
-  wire EX_MEM_mem_read_enable;    // Memory read control in EX stage
+  wire EX_MEM_MemEnable;          // Memory write control in MEM stage
+  wire EX_MEM_MemRW;              // Memory read control in EX stage
   wire EX_MEM_mem_size;           // Memory size in EX stage
   wire EX_MEM_MemtoReg;           // Memory to register control in MEM stage
   wire [3:0] EX_MEM_ALUControl;
@@ -50,13 +51,13 @@ module arm_pipeline_tb;
   
   // WB Stage Signals
   wire MEM_WB_RegWrite;           // Register write control in WB stage
+  wire MEM_WB_MemEnable;
+  wire MEM_WB_MemRW;              // Memory read control in MEM stage
+  wire MEM_WB_mem_size;           // Memory size in MEM stage
   wire MEM_WB_MemtoReg;           // Memory to register control in WB stage
   wire [3:0] MEM_WB_ALUControl;
   wire MEM_WB_ALUSrc;
   wire MEM_WB_Status;
-  wire MEM_WB_MemWrite;
-  wire MEM_WB_mem_read_enable;     // Memory read control in MEM stage
-    wire MEM_WB_mem_size;          // Memory size in MEM stage
 
   // Pipeline Register Enable Signals
   reg IF_ID_Enable;                // IF/ID register enable
@@ -64,7 +65,7 @@ module arm_pipeline_tb;
   wire S_bit_muxed;                // Muxed status bits
   wire [3:0] ALUControl_muxed;     // Muxed ALU control
   wire MemtoReg_muxed;             // Muxed memory to register select
-  wire mem_read_enable;            // Memory read enable from control unit
+  
     wire mem_size;                 // Memory size control
 
   reg [31:0] instruction_keyword;  // For storing instruction text
@@ -95,8 +96,8 @@ module arm_pipeline_tb;
   control_unit cu (
     .instruction(IF_ID_Instr),
     .reg_write_enable(RegWrite),
-    .mem_write_enable(MemWrite),
-    .mem_read_enable(mem_read_enable),    
+    .mem_enable(MemEnable),
+    .mem_rw(MemRW),    
     .mem_to_reg_select(MemtoReg),
     .alu_source_select(ALUSrc),
     .status_bit(S_bit_ctrl),
@@ -109,8 +110,8 @@ module arm_pipeline_tb;
   // Control Unit Multiplexer Instance ✅
   cu_mux control_mux (
     .reg_write_enable_in(RegWrite),
-    .mem_write_enable_in(MemWrite),
-    .mem_read_enable_in(mem_read_enable),  
+    .mem_enable_in(MemEnable),
+    .mem_rw_in(MemRW),  
     .mem_to_reg_select_in(MemtoReg),
     .alu_src_in(ALUSrc),
     .status_bit_in(S_bit_ctrl),
@@ -119,8 +120,8 @@ module arm_pipeline_tb;
     .mem_size_in(mem_size),               
     .mux_select(S_bit_mux),
     .reg_write_enable_out(RegWrite_muxed),
-    .mem_write_enable_out(MemWrite_muxed),
-    .mem_read_enable_out(mem_read_enable_muxed),  
+    .mem_enable_out(MemEnable_muxed),
+    .mem_rw_out(MemRW_muxed),  
     .mem_to_reg_select_out(MemtoReg_muxed),
     .alu_src_select_out(ALUSrc_muxed),
     .status_bit_out(S_bit_muxed),
@@ -143,16 +144,16 @@ module arm_pipeline_tb;
       .clk(clk),
       .reset(reset),
       .reg_write_enable_in(RegWrite_muxed),
-      .mem_write_enable_in(MemWrite_muxed),
-      .mem_read_enable_in(mem_read_enable_muxed),    
+      .mem_enable_in(MemEnable_muxed),
+      .mem_rw_in(MemRW_muxed),    
       .mem_to_reg_select_in(MemtoReg_muxed),
       .alu_src_select_in(ALUSrc_muxed),
       .alu_control_in(ALUControl_muxed),
       .status_bit_in(S_bit_muxed),
       .mem_size_in(mem_size_muxed),                 
       .reg_write_enable_out(ID_EX_RegWrite),
-      .mem_write_enable_out(ID_EX_MemWrite),
-      .mem_read_enable_out(ID_EX_mem_read_enable),  
+      .mem_enable_out(ID_EX_MemEnable),
+      .mem_rw_out(ID_EX_MemRW),
       .mem_to_reg_select_out(ID_EX_MemtoReg),
       .alu_src_select_out(ID_EX_ALUSrc),
       .alu_control_out(ID_EX_ALUControl),
@@ -165,16 +166,16 @@ module arm_pipeline_tb;
       .clk(clk),
       .reset(reset),
       .reg_write_enable_in(ID_EX_RegWrite),
-      .mem_write_enable_in(ID_EX_MemWrite),
-      .mem_read_enable_in(ID_EX_mem_read_enable),   
+      .mem_enable_in(ID_EX_MemEnable),
+      .mem_rw_in(ID_EX_MemRW),   
       .mem_to_reg_select_in(ID_EX_MemtoReg),
       .alu_src_select_in(ID_EX_ALUSrc),
       .alu_control_in(ID_EX_ALUControl),
       .status_bit_in(ID_EX_Status),
       .mem_size_in(ID_EX_mem_size),                
       .reg_write_enable_out(EX_MEM_RegWrite),
-      .mem_write_enable_out(EX_MEM_MemWrite),
-      .mem_read_enable_out(EX_MEM_mem_read_enable), 
+      .mem_enable_out(EX_MEM_MemEnable),
+      .mem_rw_out(EX_MEM_MemRW), 
       .mem_to_reg_select_out(EX_MEM_MemtoReg),
       .alu_src_select_out(EX_MEM_ALUSrc),
       .alu_control_out(EX_MEM_ALUControl),
@@ -187,16 +188,16 @@ module arm_pipeline_tb;
       .clk(clk),
       .reset(reset),
       .reg_write_enable_in(EX_MEM_RegWrite),
-      .mem_write_enable_in(EX_MEM_MemWrite),
-      .mem_read_enable_in(EX_MEM_mem_read_enable),  
+      .mem_enable_in(EX_MEM_MemEnable),
+      .mem_rw_in(EX_MEM_MemRW),  
       .mem_to_reg_select_in(EX_MEM_MemtoReg),
       .alu_src_select_in(EX_MEM_ALUSrc),
       .alu_control_in(EX_MEM_ALUControl),
       .status_bit_in(EX_MEM_Status),
       .mem_size_in(EX_MEM_mem_size),               
       .reg_write_enable_out(MEM_WB_RegWrite),
-      .mem_write_enable_out(MEM_WB_MemWrite),
-      .mem_read_enable_out(MEM_WB_mem_read_enable), 
+      .mem_enable_out(MEM_WB_MemEnable),
+      .mem_rw_out(MEM_WB_MemRW), 
       .mem_to_reg_select_out(MEM_WB_MemtoReg),
       .alu_src_select_out(MEM_WB_ALUSrc),
       .alu_control_out(MEM_WB_ALUControl),
@@ -228,8 +229,8 @@ module arm_pipeline_tb;
     // Control Unit (ID Stage) signals
     $display("Control Unit Signals (ID Stage):");
     $display("    ID_RF_Enable               = %b", RegWrite_muxed);
-    $display("    MEM_Enable                 = %b", MemWrite_muxed);
-    $display("    MEM_RW                     = %b", mem_read_enable_muxed);
+    $display("    MEM_Enable                 = %b", MemEnable_muxed);
+    $display("    MEM_RW                     = %b", MemRW_muxed);
     $display("    MEM_Size                   = %b", mem_size_muxed);
     $display("    ID_load_instr              = %b", MemtoReg_muxed);
     $display("    ID_ALU_Op                  = %b", ALUControl_muxed);
@@ -238,8 +239,8 @@ module arm_pipeline_tb;
     // Execute Stage signals
     $display("Execute Stage Signals:");
     $display("    ID_RF_Enable               = %b", ID_EX_RegWrite);
-    $display("    MEM_Enable                 = %b", ID_EX_MemWrite);
-    $display("    MEM_RW                     = %b", ID_EX_mem_read_enable);
+    $display("    MEM_Enable                 = %b", ID_EX_MemEnable);
+    $display("    MEM_RW                     = %b", ID_EX_MemRW);
     $display("    MEM_Size                   = %b", ID_EX_mem_size);
     $display("    ID_load_instr              = %b", ID_EX_MemtoReg);
     $display("    ID_ALU_Op                  = %b", ID_EX_ALUControl);
@@ -250,8 +251,8 @@ module arm_pipeline_tb;
     // Memory Stage signals
     $display("Memory Stage Signals:");
     $display("    ID_RF_Enable               = %b", EX_MEM_RegWrite);
-    $display("    MEM_Enable                 = %b", EX_MEM_MemWrite);
-    $display("    MEM_RW                     = %b", EX_MEM_mem_read_enable);
+    $display("    MEM_Enable                 = %b", EX_MEM_MemEnable);
+    $display("    MEM_RW                     = %b", EX_MEM_MemRW);
     $display("    MEM_Size                   = %b", EX_MEM_mem_size);
     $display("    ID_load_instr              = %b\n", EX_MEM_MemtoReg);
     

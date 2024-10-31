@@ -3,8 +3,8 @@ module control_unit (
     
     // Control signals outputs
     output reg        reg_write_enable,     // Register file write enable
-    output reg        mem_write_enable,     // Memory write enable
-    output reg        mem_read_enable,      // Memory read enable
+    output reg        mem_enable,           // Memory enable
+    output reg        mem_rw,               // Memory read/write
     output reg        mem_to_reg_select,    // Select between ALU result and memory data
     output reg        alu_source_select,    // Select between register and immediate
     output reg        status_bit,           // Status bit for condition flags
@@ -28,8 +28,8 @@ module control_unit (
 
     initial begin
         reg_write_enable = 0;
-        mem_write_enable = 0;
-        mem_read_enable = 0;
+        mem_enable = 0;
+        mem_rw = 0;
         mem_to_reg_select = 0;
         alu_source_select = 0;
         status_bit = 0;
@@ -41,8 +41,8 @@ module control_unit (
     always @(*) begin
         // Default values
         reg_write_enable = 0;
-        mem_write_enable = 0;
-        mem_read_enable = 0;
+        mem_enable = 0;
+        mem_rw = 0;
         mem_to_reg_select = 0;
         alu_source_select = 0;
         status_bit = 0;
@@ -59,18 +59,19 @@ module control_unit (
             end
 
             LOAD_STORE: begin
+                mem_enable = 1;              
                 mem_to_reg_select = 1;
-                alu_source_select = 1;  // Use immediate offset
-                mem_size = byte_access; // Set the size based on B bit
+                alu_source_select = 1;       // Use immediate offset
+                mem_size = byte_access;      // Set the size based on B bit
                 
-                case (instruction[20])  // Load/Store bit
+                case (instruction[20])       // Load/Store bit
                     1'b1: begin  // LDRB
                         reg_write_enable = 1;
-                        mem_read_enable = 1;
+                        mem_rw = 1;          // Read operation
                         mem_to_reg_select = 1;
                     end
                     1'b0: begin  // STR
-                        mem_write_enable = 1;
+                        mem_rw = 0;          // Write operation
                         mem_to_reg_select = 0;
                     end
                 endcase
@@ -85,8 +86,8 @@ module control_unit (
         // Override for NOP (detected by all zeros)
         if (instruction == 32'b0) begin
             reg_write_enable = 0;
-            mem_write_enable = 0;
-            mem_read_enable = 0;
+            mem_enable = 0;
+            mem_rw = 0;
             mem_to_reg_select = 0;
             alu_source_select = 0;
             status_bit = 0;

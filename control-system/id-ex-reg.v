@@ -4,8 +4,8 @@ module id_ex_reg (
     
     // Control signals input
     input wire reg_write_enable_in,      
-    input wire mem_write_enable_in,      
-    input wire mem_read_enable_in,
+    input wire mem_enable_in,      
+    input wire mem_rw_in,
     input wire mem_to_reg_select_in,     
     input wire alu_src_select_in,        
     input wire [3:0] alu_control_in,     
@@ -14,8 +14,8 @@ module id_ex_reg (
     
     // Control signals output  
     output reg reg_write_enable_out,     
-    output reg mem_write_enable_out,     
-    output reg mem_read_enable_out,
+    output reg mem_enable_out,     
+    output reg mem_rw_out,
     output reg mem_to_reg_select_out,    
     output reg alu_src_select_out,       
     output reg [3:0] alu_control_out,    
@@ -25,8 +25,8 @@ module id_ex_reg (
 
     initial begin
         reg_write_enable_out = 0;
-        mem_write_enable_out = 0;
-        mem_read_enable_out = 0;
+        mem_enable_out = 0;
+        mem_rw_out = 0;
         mem_to_reg_select_out = 0;
         alu_src_select_out = 0;
         alu_control_out = 4'b0000;
@@ -37,8 +37,8 @@ module id_ex_reg (
     always @(posedge clk) begin
         if (reset) begin
             reg_write_enable_out <= 0;
-            mem_write_enable_out <= 0;
-            mem_read_enable_out <= 0;
+            mem_enable_out <= 0;
+            mem_rw_out <= 0;
             mem_to_reg_select_out <= 0;
             alu_src_select_out <= 0;
             alu_control_out <= 4'b0000;
@@ -47,8 +47,8 @@ module id_ex_reg (
         end
         else begin
             reg_write_enable_out <= reg_write_enable_in;
-            mem_write_enable_out <= mem_write_enable_in;
-            mem_read_enable_out <= mem_read_enable_in;
+            mem_enable_out <= mem_enable_in;
+            mem_rw_out <= mem_rw_in;
             mem_to_reg_select_out <= mem_to_reg_select_in;
             alu_src_select_out <= alu_src_select_in;
             alu_control_out <= alu_control_in;
