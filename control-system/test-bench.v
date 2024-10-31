@@ -11,10 +11,10 @@ module arm_pipeline_tb;
   reg reset;                  // Global reset signal
   
   // IF Stage Signals
-  reg PC_enable;                 // Program Counter enable signal (changed from wire to reg)
-  wire [31:0] PC_current;        // Current Program Counter value
-  wire [31:0] PC_plus_4;         // PC + 4 for next sequential instruction
-  wire [31:0] instruction;       // Current instruction from memory
+  reg PC_enable;              // Program Counter enable signal (changed from wire to reg)
+  wire [31:0] PC_current;     // Current Program Counter value
+  wire [31:0] PC_plus_4;      // PC + 4 for next sequential instruction
+  wire [31:0] instruction;    // Current instruction from memory
 
   
   // ID Stage Signals
@@ -27,27 +27,27 @@ module arm_pipeline_tb;
   wire ALUSrc;                // Select between register and immediate
   wire S_bit_ctrl;            // Register source selection from control unit
   reg  S_bit_mux;             // Multiplexer Select bit
-  wire [1:0] ALUControl;      // ALU operation control
+  wire [3:0] ALUControl;      // ALU operation control
   wire PCSrc;                 // PC source selection for branches
   
   // EX Stage Signals
   wire ID_EX_RegWrite;        // Register write control in EX stage
   wire ID_EX_MemWrite;        // Memory write control in EX stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
-  wire [1:0] ID_EX_ALUControl;// ALU operation control in EX stage
+  wire [3:0] ID_EX_ALUControl;// ALU operation control in EX stage
   
   // MEM Stage Signals
   wire EX_MEM_RegWrite;           // Register write control in MEM stage
   wire EX_MEM_MemWrite;           // Memory write control in MEM stage
   wire EX_MEM_MemtoReg;           // Memory to register control in MEM stage
-  wire [1:0] EX_MEM_ALUControl;
+  wire [3:0] EX_MEM_ALUControl;
   wire EX_MEM_ALUSrc;
   wire EX_MEM_Status;
   
   // WB Stage Signals
   wire MEM_WB_RegWrite;           // Register write control in WB stage
   wire MEM_WB_MemtoReg;           // Memory to register control in WB stage
-  wire [1:0] MEM_WB_ALUControl;
+  wire [3:0] MEM_WB_ALUControl;
   wire MEM_WB_ALUSrc;
   wire MEM_WB_Status;
   wire MEM_WB_MemWrite;
@@ -56,7 +56,7 @@ module arm_pipeline_tb;
   reg IF_ID_Enable;               // IF/ID register enable
 
   wire S_bit_muxed;               // Muxed status bits
-  wire [1:0] ALUControl_muxed;    // Muxed ALU control
+  wire [3:0] ALUControl_muxed;    // Muxed ALU control
   wire MemtoReg_muxed;            // Muxed memory to register select
  
   reg [31:0] instruction_keyword; // For storing instruction text
@@ -168,13 +168,13 @@ module arm_pipeline_tb;
       .mem_to_reg_select_in(EX_MEM_MemtoReg),
       .alu_src_select_in(EX_MEM_ALUSrc),
       .alu_control_in(EX_MEM_ALUControl),
-      .status_bits_in(EX_MEM_Status),         // Connect status from previous stage
+      .status_bits_in(EX_MEM_Status),
       .reg_write_enable_out(MEM_WB_RegWrite),
       .mem_write_enable_out(MEM_WB_MemWrite),
       .mem_to_reg_select_out(MEM_WB_MemtoReg),
       .alu_src_select_out(MEM_WB_ALUSrc),
       .alu_control_out(MEM_WB_ALUControl),
-      .status_bits_out(MEM_WB_Status)         // Add status output
+      .status_bits_out(MEM_WB_Status)
   );
 
   // Time calculation
@@ -198,31 +198,31 @@ module arm_pipeline_tb;
     
     // Control Unit (ID Stage) signals
     $display("Control Unit Signals (ID Stage):");
-    $display("    Register File Write Enable = %b", RegWrite);
-    $display("    Memory Write Enable        = %b", MemWrite);
-    $display("    MEM Stage MUX Select       = %b", MemtoReg);
-    $display("    ALU Operation              = %b", ALUControl);
+    $display("    ID_RF_enable               = %b", RegWrite);
+    $display("    MEM_Enable (DATA_MEM)      = %b", MemWrite);
+    $display("    ID_load_instr              = %b", MemtoReg);
+    $display("    ID_ALU_op                  = %b", ALUControl);
     $display("    PC Source Select (Branch)  = %b", PCSrc);
-    $display("    Status Bit Generation      = %b", S_bit_ctrl);
-    $display("    CU-MUX Source Select       = %b\n", S_bit_mux);
+    $display("    S_bit                      = %b", S_bit_ctrl);
+    $display("    Hazard bit (CU Mux)        = %b\n", S_bit_mux);
     
     // Execute Stage signals
     $display("Execute Stage Signals:");
-    $display("    Register File Write Enable = %b", ID_EX_RegWrite);
-    $display("    Memory Write Enable        = %b", ID_EX_MemWrite);
-    $display("    MEM Stage MUX Select       = %b", ID_EX_MemtoReg);
-    $display("    Status Bit                 = %b", ID_EX_ALUSrc);
+    $display("    ID_RF_enable               = %b", ID_EX_RegWrite);
+    $display("    MEM_Enable (DATA_MEM)      = %b", ID_EX_MemWrite);
+    $display("    ID_load_instr              = %b", ID_EX_MemtoReg);
+    $display("    S_bit                      = %b", ID_EX_ALUSrc);
     $display("    ALU Operation              = %b\n", ID_EX_ALUControl);
     
     // Memory Stage signals
     $display("Memory Stage Signals:");
-    $display("    Register File Write Enable = %b", EX_MEM_RegWrite);
-    $display("    Memory Write Enable        = %b", EX_MEM_MemWrite);
-    $display("    MEM Stage MUX Select       = %b\n", EX_MEM_MemtoReg);
+    $display("    ID_RF_enable               = %b", EX_MEM_RegWrite);
+    $display("    MEM_Enable (DATA_MEM)      = %b", EX_MEM_MemWrite);
+    $display("    ID_load_instr              = %b\n", EX_MEM_MemtoReg);
     
     // Write Back Stage signals
     $display("Write Back Stage Signals:");
-    $display("    Register File Write Enable = %b", MEM_WB_RegWrite);
+    $display("    ID_RF_enable               = %b", MEM_WB_RegWrite);
     
     $display("\n----------------------------------------\n");
   end

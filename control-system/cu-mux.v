@@ -5,7 +5,7 @@ module cu_mux (
     input wire mem_to_reg_select_in,  // Memory to register select input
     input wire alu_src_in,            // ALU source select input
     input wire status_bit_in,         // Status bits input
-    input wire [1:0] alu_control_in,  // ALU control input
+    input wire [3:0] alu_control_in,  // ALU control input
     input wire pc_src_select_in,      // PC source select input
     input wire mux_select,            // Multiplexer select bit input
     
@@ -15,7 +15,7 @@ module cu_mux (
     output reg mem_to_reg_select_out,  // Memory to register select output
     output reg alu_src_select_out,     // ALU source select output
     output reg status_bits_out,  // Status bits output
-    output reg [1:0] alu_control_out,  // ALU control output
+    output reg [3:0] alu_control_out,  // ALU control output
     output reg pc_src_select_out       // PC source select output
 );
 
