@@ -63,18 +63,19 @@ module control_unit (
                 mem_to_reg_select = 1;
                 alu_source_select = 1;       // Use immediate offset
                 mem_size = byte_access;      // Set the size based on B bit
-                
-                case (instruction[20])       // Load/Store bit
-                    1'b1: begin  // LDRB
-                        reg_write_enable = 1;
-                        mem_rw = 1;          // Read operation
-                        mem_to_reg_select = 1;
-                    end
-                    1'b0: begin  // STR
-                        mem_rw = 0;          // Write operation
-                        mem_to_reg_select = 0;
-                    end
-                endcase
+                if (mem_enable) begin
+                    case (instruction[20])       // Load/Store bit
+                        1'b1: begin  // LDRB
+                            reg_write_enable = 1;
+                            mem_rw = 0;          // Read operation
+                            mem_to_reg_select = 1;
+                        end
+                        1'b0: begin  // STR
+                            mem_rw = 1;          // Write operation
+                            mem_to_reg_select = 0; 
+                        end
+                    endcase
+                end
             end
 
             BRANCH: begin
