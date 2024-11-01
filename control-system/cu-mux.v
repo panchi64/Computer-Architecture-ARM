@@ -1,26 +1,26 @@
 module cu_mux (
     // Input control signals
-    input wire reg_write_enable_in,   // Register write enable input
-    input wire mem_enable_in,   // Memory write enable input
-    input wire mem_rw_in,    // Memory read enable input
-    input wire mem_to_reg_select_in,  // Memory to register select input
-    input wire alu_src_in,            // ALU source select input
-    input wire status_bit_in,         // Status bits input
-    input wire [3:0] alu_control_in,  // ALU control input
-    input wire pc_src_select_in,      // PC source select input
-    input wire mem_size_in,           // Memory size input
-    input wire mux_select,            // Multiplexer select bit input
+    input wire reg_write_enable_in,     // Register write enable input
+    input wire mem_enable_in,           // Memory write enable input
+    input wire mem_rw_in,               // Memory read enable input
+    input wire mem_to_reg_select_in,    // Memory to register select input
+    input wire alu_src_in,              // ALU source select input
+    input wire status_bit_in,           // Status bits input
+    input wire [3:0] alu_control_in,    // ALU control input
+    input wire pc_src_select_in,        // PC source select input
+    input wire mem_size_in,             // Memory size input
+    input wire mux_select,              // Multiplexer select bit input
     
     // Output control signals - fixed variable names
-    output reg reg_write_enable_out,   // Register write enable output
-    output reg mem_enable_out,   // Memory write enable output
-    output reg mem_rw_out,    // Memory read enable output
-    output reg mem_to_reg_select_out,  // Memory to register select output
-    output reg alu_src_select_out,     // ALU source select output
-    output reg status_bit_out,         // Status bit output
-    output reg [3:0] alu_control_out,  // ALU control output
+    output reg reg_write_enable_out,    // Register write enable output
+    output reg mem_enable_out,          // Memory write enable output
+    output reg mem_rw_out,              // Memory read enable output
+    output reg mem_to_reg_select_out,   // Memory to register select output
+    output reg alu_src_select_out,      // ALU source select output
+    output reg status_bit_out,          // Status bit output
+    output reg [3:0] alu_control_out,   // ALU control output
     output reg pc_src_select_out,       // PC source select output
-    output reg mem_size_out            // NEW: Memory size output
+    output reg mem_size_out             // Memory size output
 );
 
     initial begin
