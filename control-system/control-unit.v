@@ -17,8 +17,7 @@ module control_unit (
     wire [3:0] condition_code = instruction[31:28];  // Condition field
     wire [1:0] operation_type = instruction[27:26];  // Determines instruction type
     wire immediate_flag = instruction[25];           // Immediate operand flag
-    wire [3:0] opcode = instruction[24:21];         // Operation code
-    wire byte_access = instruction[22];              // B bit for byte access
+    wire [3:0] opcode = instruction[24:21];          // Operation code
     wire s_bit = instruction[20];                    // Status bit flag
     
     // Instruction type parameters
@@ -126,17 +125,19 @@ module control_unit (
                 mem_enable = 1;              
                 mem_to_reg_select = 1;
                 alu_source_select = 1;              // Use immediate offset
-                mem_size = byte_access;             // Set the size based on B bit
+                
                 if (mem_enable) begin
                     case (instruction[20])          // Load/Store bit
                         1'b1: begin  // LDRB
                             reg_write_enable = 1;
                             mem_rw = 0;             // Read operation
                             mem_to_reg_select = 1;
+                            mem_size = 1'b1;        // Set to 1 for byte access
                         end
                         1'b0: begin  // STR
                             mem_rw = 1;             // Write operation
-                            mem_to_reg_select = 0; 
+                            mem_to_reg_select = 0;
+                            mem_size = 1'b0;        // Set to 0 for word access
                         end
                     endcase
                 end
