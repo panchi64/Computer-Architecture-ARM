@@ -3,7 +3,7 @@
 Clock: 0
 Program Counter: 0
 
-Instruction: UNK 
+Instruction: NOP 
 Reset: 1
 Hazard Bit (CU MUX): 0
 
@@ -14,6 +14,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -23,6 +24,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -41,7 +43,7 @@ Write Back Stage Signals:
 Clock: 1
 Program Counter: 0
 
-Instruction: UNK 
+Instruction: NOP 
 Reset: 1
 Hazard Bit (CU MUX): 0
 
@@ -52,6 +54,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -61,6 +64,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -90,6 +94,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -99,6 +104,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -128,6 +134,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -137,6 +144,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -166,6 +174,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 1
 
 Execute Stage Signals:
@@ -175,6 +184,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -204,6 +214,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 1
 
 Execute Stage Signals:
@@ -213,6 +224,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -242,6 +254,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -251,6 +264,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 1
     B/BL                       = 0
 
@@ -280,6 +294,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -289,6 +304,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 1
     B/BL                       = 0
 
@@ -318,6 +334,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -327,6 +344,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -356,6 +374,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -365,6 +384,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -394,6 +414,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -403,6 +424,7 @@ Execute Stage Signals:
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 0
 
@@ -432,6 +454,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -441,6 +464,7 @@ Execute Stage Signals:
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 0
 
@@ -470,6 +494,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -479,6 +504,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 1
 
@@ -508,6 +534,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -517,6 +544,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 1
 
@@ -546,6 +574,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -555,6 +584,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
     B/BL                       = 1
 
@@ -584,6 +614,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -593,6 +624,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
     B/BL                       = 1
 
@@ -622,6 +654,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -631,6 +664,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
     B/BL                       = 0
 
@@ -660,6 +694,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -669,6 +704,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
     B/BL                       = 0
 
@@ -698,6 +734,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -707,6 +744,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 1
     B/BL                       = 0
 
@@ -736,6 +774,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -745,6 +784,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0110
+    AM                         = 00
     S_bit                      = 1
     B/BL                       = 0
 
@@ -774,6 +814,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -783,6 +824,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -812,6 +854,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -821,6 +864,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -850,6 +894,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -859,6 +904,7 @@ Execute Stage Signals:
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 0
 
@@ -888,6 +934,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -897,6 +944,7 @@ Execute Stage Signals:
     MEM_Size                   = 1
     ID_load_instr              = 1
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 0
 
@@ -926,6 +974,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -935,6 +984,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 1
 
@@ -964,6 +1014,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -973,6 +1024,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 01
     S_bit                      = 1
     B/BL                       = 1
 
@@ -1002,6 +1054,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1011,6 +1064,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1040,6 +1094,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1049,6 +1104,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 10
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1078,6 +1134,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1087,6 +1144,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1116,6 +1174,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1125,6 +1184,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1154,6 +1214,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1163,6 +1224,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1192,6 +1254,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1201,6 +1264,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1230,6 +1294,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1239,6 +1304,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1268,6 +1334,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1277,6 +1344,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1306,6 +1374,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1315,6 +1384,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1344,6 +1414,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1353,6 +1424,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1382,6 +1454,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1391,6 +1464,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1420,6 +1494,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1429,6 +1504,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1458,6 +1534,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1467,6 +1544,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 
@@ -1496,6 +1574,7 @@ Control Unit Signals (ID Stage):
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
 
 Execute Stage Signals:
@@ -1505,6 +1584,7 @@ Execute Stage Signals:
     MEM_Size                   = 0
     ID_load_instr              = 0
     ID_ALU_Op                  = 0000
+    AM                         = 00
     S_bit                      = 0
     B/BL                       = 0
 

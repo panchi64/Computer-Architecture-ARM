@@ -19,6 +19,7 @@ module arm_pipeline_tb;
   
   // ID Stage Signals
   wire [31:0] IF_ID_Instr;    // Instruction passed to ID stage
+  wire [1:0]  IF_ID_AM_bits;  // Addresssing mode bits
   
   // Control Unit Signals
   wire RegWrite;              // Register file write enable
@@ -38,6 +39,7 @@ module arm_pipeline_tb;
   wire ID_EX_mem_size;        // Memory size in ID stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
   wire [3:0] ID_EX_ALUControl;// ALU operation control in EX stage
+  wire [1:0] ID_EX_AM_bits;   // Addressing Mode bits
   
   // MEM Stage Signals
   wire EX_MEM_RegWrite;           // Register write control in MEM stage
@@ -65,8 +67,7 @@ module arm_pipeline_tb;
   wire S_bit_muxed;                // Muxed status bits
   wire [3:0] ALUControl_muxed;     // Muxed ALU control
   wire MemtoReg_muxed;             // Muxed memory to register select
-  
-    wire mem_size;                 // Memory size control
+  wire mem_size;                   // Memory size control
 
   reg [31:0] instruction_keyword;  // For storing instruction text
 
@@ -136,6 +137,7 @@ module arm_pipeline_tb;
     .reset(reset),
     .enable(IF_ID_Enable),
     .instruction_in(instruction),
+    .am_bits_out(IF_ID_AM_bits),
     .instruction_out(IF_ID_Instr)
   );
 
@@ -150,7 +152,8 @@ module arm_pipeline_tb;
       .alu_src_select_in(ALUSrc_muxed),
       .alu_control_in(ALUControl_muxed),
       .status_bit_in(S_bit_muxed),
-      .mem_size_in(mem_size_muxed),                 
+      .mem_size_in(mem_size_muxed),
+      .am_bits_in(IF_ID_AM_bits),                 
       .reg_write_enable_out(ID_EX_RegWrite),
       .mem_enable_out(ID_EX_MemEnable),
       .mem_rw_out(ID_EX_MemRW),
@@ -158,7 +161,8 @@ module arm_pipeline_tb;
       .alu_src_select_out(ID_EX_ALUSrc),
       .alu_control_out(ID_EX_ALUControl),
       .status_bit_out(ID_EX_Status),
-      .mem_size_out(ID_EX_mem_size)                 
+      .mem_size_out(ID_EX_mem_size),
+      .am_bits_out(ID_EX_AM_bits)                
   );
 
   // EX/MEM Pipeline Register Instance ✅
@@ -234,6 +238,7 @@ module arm_pipeline_tb;
     $display("    MEM_Size                   = %b", mem_size_muxed);
     $display("    ID_load_instr              = %b", MemtoReg_muxed);
     $display("    ID_ALU_Op                  = %b", ALUControl_muxed);
+    $display("    AM                         = %b", IF_ID_AM_bits);
     $display("    S_bit                      = %b\n", S_bit_muxed);
     
     // Execute Stage signals
@@ -244,6 +249,7 @@ module arm_pipeline_tb;
     $display("    MEM_Size                   = %b", ID_EX_mem_size);
     $display("    ID_load_instr              = %b", ID_EX_MemtoReg);
     $display("    ID_ALU_Op                  = %b", ID_EX_ALUControl);
+    $display("    AM                         = %b", ID_EX_AM_bits);
     $display("    S_bit                      = %b", ID_EX_ALUSrc);
     $display("    B/BL                       = %b\n", PCSrc_muxed);
     // $display(, ID_EX_);
