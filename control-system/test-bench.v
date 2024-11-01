@@ -38,6 +38,7 @@ module arm_pipeline_tb;
   wire ID_EX_MemRW;           // Memory read control in ID stage
   wire ID_EX_mem_size;        // Memory size in ID stage
   wire ID_EX_ALUSrc;          // ALU source control in EX stage
+  wire ID_EX_PCSrc;           // Branch/Branch and Link signal in EX stage
   wire [3:0] ID_EX_ALUControl;// ALU operation control in EX stage
   wire [1:0] ID_EX_AM_bits;   // Addressing Mode bits
   
@@ -162,7 +163,9 @@ module arm_pipeline_tb;
       .alu_control_out(ID_EX_ALUControl),
       .status_bit_out(ID_EX_Status),
       .mem_size_out(ID_EX_mem_size),
-      .am_bits_out(ID_EX_AM_bits)                
+      .am_bits_out(ID_EX_AM_bits),
+      .pc_src_select_in(PCSrc_muxed),
+      .pc_src_select_out(ID_EX_PCSrc)       
   );
 
   // EX/MEM Pipeline Register Instance ✅
@@ -239,7 +242,9 @@ module arm_pipeline_tb;
     $display("    ID_load_instr              = %b", MemtoReg_muxed);
     $display("    ID_ALU_Op                  = %b", ALUControl_muxed);
     $display("    AM                         = %b", IF_ID_AM_bits);
-    $display("    S_bit                      = %b\n", S_bit_muxed);
+    $display("    S_bit                      = %b", S_bit_muxed);
+    $display("    B/BL                       = %b\n", PCSrc_muxed);
+
     
     // Execute Stage signals
     $display("Execute Stage Signals:");
@@ -251,7 +256,7 @@ module arm_pipeline_tb;
     $display("    ID_ALU_Op                  = %b", ID_EX_ALUControl);
     $display("    AM                         = %b", ID_EX_AM_bits);
     $display("    S_bit                      = %b", ID_EX_ALUSrc);
-    $display("    B/BL                       = %b\n", PCSrc_muxed);
+    $display("    B/BL                       = %b\n", ID_EX_PCSrc);
     // $display(, ID_EX_);
     
     // Memory Stage signals

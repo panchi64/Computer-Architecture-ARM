@@ -12,6 +12,7 @@ module id_ex_reg (
     input wire status_bit_in,
     input wire mem_size_in,
     input wire [1:0] am_bits_in,
+    input wire pc_src_select_in,
     
     // Control signals output  
     output reg reg_write_enable_out,     
@@ -22,7 +23,8 @@ module id_ex_reg (
     output reg [3:0] alu_control_out,    
     output reg status_bit_out,
     output reg mem_size_out,
-    output reg [1:0] am_bits_out
+    output reg [1:0] am_bits_out,
+    output reg pc_src_select_out
 );
 
     initial begin
@@ -35,6 +37,7 @@ module id_ex_reg (
         status_bit_out = 0;
         mem_size_out = 0;
         am_bits_out = 2'b00;
+        pc_src_select_out = 0;
     end
 
     always @(posedge clk) begin
@@ -48,6 +51,7 @@ module id_ex_reg (
             status_bit_out <= 0;
             mem_size_out <= 0;
             am_bits_out <= 2'b00;
+            pc_src_select_out = 0;
         end
         else begin
             reg_write_enable_out <= reg_write_enable_in;
@@ -59,6 +63,7 @@ module id_ex_reg (
             status_bit_out <= status_bit_in;
             mem_size_out <= mem_size_in;
             am_bits_out <= am_bits_in;
+            pc_src_select_out <= pc_src_select_in;
         end
     end
 endmodule
