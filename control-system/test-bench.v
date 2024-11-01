@@ -31,6 +31,7 @@ module arm_pipeline_tb;
   reg  S_bit_mux;             // Multiplexer Select bit
   wire [3:0] ALUControl;      // ALU operation control
   wire PCSrc;                 // PC source selection for branches
+  wire [1:0] addressing_mode; // Addressing mode from control unit
   
   // EX Stage Signals
   wire ID_EX_RegWrite;        // Register write control in EX stage
@@ -105,7 +106,8 @@ module arm_pipeline_tb;
     .status_bit(S_bit_ctrl),
     .alu_operation(ALUControl),
     .pc_source_select(PCSrc),
-    .mem_size(mem_size)                   
+    .mem_size(mem_size),
+    .addressing_mode(addressing_mode)
   );
 
 
@@ -138,6 +140,7 @@ module arm_pipeline_tb;
     .reset(reset),
     .enable(IF_ID_Enable),
     .instruction_in(instruction),
+    .am_bits_in(addressing_mode),
     .am_bits_out(IF_ID_AM_bits),
     .instruction_out(IF_ID_Instr)
   );
@@ -241,7 +244,7 @@ module arm_pipeline_tb;
     $display("    MEM_Size                   = %b", mem_size_muxed);
     $display("    ID_load_instr              = %b", MemtoReg_muxed);
     $display("    ID_ALU_Op                  = %b", ALUControl_muxed);
-    $display("    AM                         = %b", IF_ID_AM_bits);
+    $display("    AM                         = %b", addressing_mode);
     $display("    S_bit                      = %b", S_bit_muxed);
     $display("    B/BL                       = %b\n", PCSrc_muxed);
 

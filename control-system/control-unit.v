@@ -10,7 +10,8 @@ module control_unit (
     output reg        status_bit,           // Status bit for condition flags
     output reg [3:0]  alu_operation,        // ALU operation control
     output reg        pc_source_select,     // Program counter source selection for branches
-    output reg        mem_size              // Memory access size (1: word, 0: byte)
+    output reg        mem_size,             // Memory access size (1: word, 0: byte)
+    output reg [1:0]  addressing_mode      // Output for addressing mode
 );
 
     // Instruction field extraction
@@ -19,11 +20,18 @@ module control_unit (
     wire immediate_flag = instruction[25];           // Immediate operand flag
     wire [3:0] opcode = instruction[24:21];          // Operation code
     wire s_bit = instruction[20];                    // Status bit flag
+    wire shift_amount_type = instruction[4];         // Shift amount type (0: immediate, 1: register)
     
     // Instruction type parameters
     localparam DATA_PROCESSING = 2'b00;
     localparam LOAD_STORE = 2'b01;
     localparam BRANCH = 2'b10;
+
+    // Addressing Mode parameters
+    localparam AM_IMMEDIATE      = 2'b00;   // Immediate operand/offset
+    localparam AM_REGISTER       = 2'b01;   // Register offset (Load/Store)
+    localparam AM_SHIFT_IMM     = 2'b10;    // Shift by immediate (Data Processing)
+    localparam AM_SHIFT_REG     = 2'b11;    // Shift by register (Data Processing)
 
     // ALU Operation Mapping
     localparam ALU_ADD     = 4'b0000;  // A + B
@@ -107,6 +115,8 @@ module control_unit (
         alu_operation = 4'b0000;
         pc_source_select = 0;
         mem_size = 0;
+        addressing_mode = AM_IMMEDIATE;
+
 
         case (operation_type)
             DATA_PROCESSING: begin
@@ -114,6 +124,14 @@ module control_unit (
                 alu_operation = map_alu_op(opcode); // Map CU opcode to ALU operation
                 status_bit = s_bit;
                 alu_source_select = immediate_flag;
+
+                // Determine addressing mode for Data Processing
+                if (immediate_flag)
+                    addressing_mode = AM_IMMEDIATE;      // Immediate operand
+                else if (!shift_amount_type)
+                    addressing_mode = AM_SHIFT_IMM;      // Shift by immediate
+                else
+                    addressing_mode = AM_SHIFT_REG;      // Shift by register
                 
                 // Handle test instructions (no register write)
                 case (opcode)
@@ -125,6 +143,12 @@ module control_unit (
                 mem_enable = 1;              
                 mem_to_reg_select = 1;
                 alu_source_select = 1;              // Use immediate offset
+
+                // Determine addressing mode for Load/Store
+                if (!immediate_flag)
+                    addressing_mode = AM_IMMEDIATE; // Immediate offset
+                else
+                    addressing_mode = AM_REGISTER;  // Register offset
                 
                 if (mem_enable) begin
                     case (instruction[20])          // Load/Store bit
@@ -160,6 +184,7 @@ module control_unit (
             alu_operation = 4'b0000;
             pc_source_select = 0;
             mem_size = 0;
+            addressing_mode = 2'b00;
         end
     end
 
