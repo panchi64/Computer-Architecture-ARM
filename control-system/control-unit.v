@@ -156,7 +156,7 @@ module control_unit (
                             reg_write_enable = 1;
                             mem_rw = 0;             // Read operation
                             mem_to_reg_select = 1;
-                            mem_size = 1'b1;        // Set to 1 for byte access
+                            mem_size = 1'b0;        // Set to 0 for byte access
                         end
                         1'b0: begin  // STR
                             mem_rw = 1;             // Write operation
