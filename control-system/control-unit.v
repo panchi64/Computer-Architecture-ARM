@@ -28,12 +28,12 @@ module control_unit (
     localparam BRANCH = 2'b10;
 
     // Addressing Mode parameters
-    localparam AM_IMMEDIATE      = 2'b00;   // Immediate operand/offset
-    localparam AM_REGISTER       = 2'b01;   // Register offset (Load/Store)
+    localparam AM_IMMEDIATE     = 2'b00;   // Immediate operand/offset
+    localparam AM_REGISTER      = 2'b01;   // Register offset (Load/Store)
     localparam AM_SHIFT_IMM     = 2'b10;    // Shift by immediate (Data Processing)
     localparam AM_SHIFT_REG     = 2'b11;    // Shift by register (Data Processing)
 
-    // ALU Operation Mapping
+    // ALU Operation Mapping/Translations
     localparam ALU_ADD     = 4'b0000;  // A + B
     localparam ALU_ADDC    = 4'b0001;  // A + B + CIN
     localparam ALU_SUB     = 4'b0010;  // A - B
@@ -48,7 +48,7 @@ module control_unit (
     localparam ALU_NOTB    = 4'b1011;  // not B
     localparam ALU_ANDNB   = 4'b1100;  // A and (not B)
 
-    // Control Unit Opcode Mapping
+    // Control Unit Opcode Mapping/Translations
     localparam CU_AND = 4'b0000;
     localparam CU_EOR = 4'b0001;
     localparam CU_SUB = 4'b0010;
@@ -128,7 +128,7 @@ module control_unit (
                 // Determine addressing mode for Data Processing
                 if (immediate_flag)
                     addressing_mode = AM_IMMEDIATE;      // Immediate operand
-                else if (!shift_amount_type)
+                else if (shift_amount_type)
                     addressing_mode = AM_SHIFT_IMM;      // Shift by immediate
                 else
                     addressing_mode = AM_SHIFT_REG;      // Shift by register
@@ -145,7 +145,7 @@ module control_unit (
                 alu_source_select = 1;              // Use immediate offset
 
                 // Determine addressing mode for Load/Store
-                if (!immediate_flag)
+                if (immediate_flag)
                     addressing_mode = AM_IMMEDIATE; // Immediate offset
                 else
                     addressing_mode = AM_REGISTER;  // Register offset
@@ -156,12 +156,12 @@ module control_unit (
                             reg_write_enable = 1;
                             mem_rw = 0;             // Read operation
                             mem_to_reg_select = 1;
-                            mem_size = 1'b0;        // Set to 0 for byte access
+                            mem_size = 1'b0;        // 0 for byte access
                         end
                         1'b0: begin  // STR
                             mem_rw = 1;             // Write operation
                             mem_to_reg_select = 0;
-                            mem_size = 1'b0;        // Set to 0 for word access
+                            mem_size = 1'b1;        // 1 for word access
                         end
                     endcase
                 end
