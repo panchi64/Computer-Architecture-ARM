@@ -132,7 +132,7 @@ always @(*) begin
                 addressing_mode = AM_IMMEDIATE;      // I=1: Immediate operand
             end else begin
                                                      // I=0: Second operand is a register
-                if (|shift_amount)                   // If any shift amount bits are set
+                if (shift_amount)                   // If any shift amount bits are set
                     addressing_mode = AM_SCALED_REG; // Register with shift
                 else
                     addressing_mode = AM_REG_OFFSET; // Register without shift
