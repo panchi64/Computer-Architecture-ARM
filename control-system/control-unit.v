@@ -35,8 +35,8 @@ localparam BRANCH = 2'b10;
 // Addressing Mode parameters
 localparam AM_IMMEDIATE    = 2'b00;    // Immediate operand
 localparam AM_SCALED_REG   = 2'b11;    // Scaled register
-localparam AM_IMM_OFFSET   = 2'b01;    // Immediate offset for load/store
-localparam AM_REG_OFFSET   = 2'b10;    // Register offset for load/store
+localparam AM_IMM_OFFSET   = 2'b10;    // Immediate offset for load/store
+localparam AM_REG_OFFSET   = 2'b01;    // Register offset for load/store
 
 // ALU Operation Mapping/Translations
 localparam ALU_ADD     = 4'b0000;  // A + B
@@ -143,28 +143,21 @@ always @(*) begin
             endcase
         end
 
-        LOAD_STORE: begin
-            mem_enable = 1;
-            alu_source_select = 1;
-            
-            // For LDRB/STR memory size
-            mem_size = !b_bit;        // 0=byte (LDRB), 1=word (STR)
-            
-            if (l_bit) begin         // Load
-                reg_write_enable = 1;
-                mem_rw = 0;          // Read
-                mem_to_reg_select = 1;
-            end else begin           // Store
-                mem_rw = 1;          // Write
-            end
-            
-            // Corrected addressing mode logic for load/store
-            if (!immediate_flag) begin     // I=0
-                addressing_mode = AM_IMM_OFFSET;  // Immediate offset
-            end else begin                 // I=1
-                addressing_mode = AM_REG_OFFSET;  // Register offset
-            end
+    LOAD_STORE: begin
+        mem_enable = 1;
+        alu_source_select = 1;
+        mem_size = !b_bit;       // 0=byte (LDRB), 1=word (STR)
+        
+        if (l_bit) begin         // Load
+            reg_write_enable = 1;
+            mem_rw = 0;          
+            mem_to_reg_select = 1;
+            addressing_mode = AM_SCALED_REG;  // LDRB uses scaled register offset (11)
+        end else begin           // Store
+            mem_rw = 1;          
+            addressing_mode = AM_IMM_OFFSET;  // STR uses immediate offset (10)
         end
+    end
 
         BRANCH: begin
             pc_source_select = 1;
