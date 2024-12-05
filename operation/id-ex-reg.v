@@ -13,6 +13,13 @@ module id_ex_reg (
     input wire mem_size_in,
     input wire [1:0] am_bits_in,
     input wire pc_src_select_in,
+    input wire [31:0] reg_data_a_in,      // Register A data
+    input wire [31:0] reg_data_b_in,      // Register B data
+    input wire [31:0] reg_data_c_in,      // Register C data
+    input wire [31:0] extended_imm_in,    // Sign extended immediate
+    input wire [3:0] reg_dst_in,          // Destination register
+    input wire [31:0] pc_plus_4_in,       // PC+4 value
+
     
     // Control signals output  
     output reg reg_write_enable_out,     
@@ -25,6 +32,12 @@ module id_ex_reg (
     output reg mem_size_out,
     output reg [1:0] am_bits_out,
     output reg pc_src_select_out
+    output reg [31:0] reg_data_a_out,
+    output reg [31:0] reg_data_b_out,
+    output reg [31:0] reg_data_c_out,
+    output reg [31:0] extended_imm_out,
+    output reg [3:0] reg_dst_out,
+    output reg [31:0] pc_plus_4_out
 );
 
     initial begin
