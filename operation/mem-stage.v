@@ -3,55 +3,34 @@ module mem_stage (
     input wire clk,
     input wire reset,
     
-    // Control signals from EX/MEM pipeline register
-    input wire mem_enable,
-    input wire mem_rw,        // 0 = read, 1 = write
-    input wire mem_size,      // 0 = byte, 1 = word
-    input wire mem_to_reg_select,
+    // Control signals
+    input wire E,              // Memory enable
+    input wire RW,             // Read/Write control
+    input wire Size,           // Byte/Word selection
+    input wire mem_to_reg,     // MUX select for output
     
     // Data inputs
-    input wire [31:0] alu_result,     // Address from ALU
-    input wire [31:0] write_data,     // Data to write to memory
+    input wire [31:0] AD,      // Address from ALU
+    input wire [31:0] IN,      // Data to write
     
-    // Forwarding inputs
-    input wire [1:0] forward_select,  // Forwarding control
-    input wire [31:0] ex_forwarded_data,
-    input wire [31:0] mem_forwarded_data,
-    input wire [31:0] wb_forwarded_data,
-    
-    // Outputs
-    output wire [31:0] mem_result,    // Data read from memory
-    output wire [31:0] final_result   // Selected result (mem or ALU)
+    // Output
+    output wire [31:0] Out     // Final stage output
 );
 
-    // Internal wires
-    wire [31:0] selected_write_data;
-    wire [31:0] memory_read_data;
-
-    // Forwarding multiplexer for write data
-    id_forwarding_mux write_data_mux (
-        .reg_data(write_data),
-        .ex_forwarded_data(ex_forwarded_data),
-        .mem_forwarded_data(mem_forwarded_data),
-        .wb_forwarded_data(wb_forwarded_data),
-        .forward_select(forward_select),
-        .selected_data(selected_write_data)
-    );
+    // Internal wire for memory output
+    wire [31:0] mem_out;
 
     // Data memory instance
     data_memory dmem (
-        .DO(memory_read_data),         // Data output
-        .DI(selected_write_data),      // Data input
-        .A(alu_result[7:0]),          // Address (8-bit)
-        .Size(mem_size),              // Size control
-        .RW(mem_rw),                  // Read/Write control
-        .E(mem_enable)                // Enable signal
+        .DO(mem_out),          // Data output
+        .DI(IN),              // Data input
+        .A(AD[7:0]),         // Address (8-bit)
+        .Size(Size),         // Size control
+        .RW(RW),             // Read/Write control
+        .E(E)                // Enable signal
     );
 
-    // Assign memory result
-    assign mem_result = memory_read_data;
-
-    // Final result multiplexer
-    assign final_result = mem_to_reg_select ? memory_read_data : alu_result;
+    // Output multiplexer (select between memory output and ALU result)
+    assign Out = mem_to_reg ? mem_out : AD;
 
 endmodule

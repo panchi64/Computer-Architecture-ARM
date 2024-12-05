@@ -4,7 +4,8 @@ module id_stage (
     
     // Inputs from IF/ID register
     input wire [31:0] instruction,         // Current instruction
-    input wire [31:0] pc_plus_4_in,       // PC+4 from IF stage
+    input wire [31:0] pc_plus_4_in,       // Next PC from IF stage
+    input wire [31:0] current_pc_in,      // Current PC from IF stage
     
     // Forwarding inputs
     input wire [31:0] ex_result,          // Result from EX stage
@@ -12,137 +13,139 @@ module id_stage (
     input wire [31:0] wb_result,          // Result from WB stage
     
     // Write-back inputs
-    input wire [31:0] write_data,         // Data to write to register file
-    input wire [3:0] write_reg,           // Register to write to
-    input wire write_enable,              // Register write enable
+    input wire [31:0] write_data,         // Data to write to register file (PW)
+    input wire [3:0] write_reg,           // Register to write to (RW)
+    input wire write_enable,              // Register write enable (LE)
     
     // Hazard detection inputs
-    input wire [3:0] ex_destination_reg,  // Destination register in EX stage
-    input wire [3:0] mem_destination_reg, // Destination register in MEM stage
-    input wire [3:0] wb_destination_reg,  // Destination register in WB stage
-    input wire ex_mem_read,               // Memory read in EX stage
+    input wire [3:0] ex_destination_reg,  
+    input wire [3:0] mem_destination_reg, 
+    input wire [3:0] wb_destination_reg,  
+    input wire ex_mem_read,               
     
-    // Control outputs
-    output wire reg_write_enable,         // Register write enable
-    output wire mem_enable,               // Memory enable
-    output wire mem_rw,                   // Memory read/write
-    output wire mem_to_reg_select,        // Select between ALU and memory
-    output wire alu_source_select,        // Select between register and immediate
-    output wire [3:0] alu_operation,      // ALU operation control
-    output wire status_bit,               // Status bit
-    output wire mem_size,                 // Memory access size
-    output wire [1:0] addressing_mode,    // Addressing mode
+    // Control signals (matching diagram)
+    output wire [3:0] D_ALU_op,                 // ALU operation control
+    output wire D_load_instr,             // Load instruction indicator
+    output wire D_RF_enable,              // Register file enable
+    output wire D_mem_size,               // Memory access size
+    output wire D_mem_readwrite,          // Memory read/write control
+    output wire D_mem_enable,             // Memory enable
+    output wire [1:0] D_am,               // Addressing mode
+    output wire D_B_instr,                // Branch instruction indicator
+    output wire D_BL_instr,               // Branch with link instruction
+    output wire store_cc,                 // Store condition codes
     
-    // Data outputs
-    output wire [31:0] reg_data_a,        // Register A data
-    output wire [31:0] reg_data_b,        // Register B data
-    output wire [31:0] reg_data_c,        // Register C data
-    output wire [31:0] extended_immediate,// Extended immediate value
-    output wire [3:0] destination_reg,    // Destination register
+    // Data path outputs (matching diagram)
+    output wire [31:0] PA,                // Register A data output
+    output wire [31:0] PB,                // Register B data output
+    output wire [31:0] PD,                // Register D data output
+    output wire [31:0] N,                 // Shifter/Sign extender output
+    output wire B,                        // Branch signal
+    output wire [3:0] CC,                 // Condition codes
     
     // Pipeline control
     output wire stall_pipeline,           // Pipeline stall signal
     output wire flush_pipeline            // Pipeline flush signal
 );
 
-    // Extract register addresses from instruction
-    wire [3:0] ra = instruction[19:16];   // First source register (Rn)
-    wire [3:0] rb = instruction[15:12];   // Destination register (Rd)
-    wire [3:0] rc = instruction[3:0];     // Second source register (Rm)
+    // Internal signals
+    wire [3:0] RA = instruction[19:16];   // Source register A
+    wire [3:0] RB = instruction[15:12];   // Source register B
+    wire [3:0] RD = instruction[3:0];     // Destination register
+    wire [1:0] forward_a, forward_b, forward_d;
+    wire [31:0] rf_data_a, rf_data_b, rf_data_d;
+    wire [3:0] condition = instruction[31:28];  // Condition field
     
-    // Forwarding control signals
-    wire [1:0] forward_a, forward_b, forward_c;
-    
-    // Register file outputs before forwarding
-    wire [31:0] rf_data_a, rf_data_b, rf_data_c;
-    
-    // Control Unit
+    // Control Unit (expanded to match diagram signals)
     control_unit cu (
         .instruction(instruction),
-        .reg_write_enable(reg_write_enable),
-        .mem_enable(mem_enable),
-        .mem_rw(mem_rw),
-        .mem_to_reg_select(mem_to_reg_select),
-        .alu_source_select(alu_source_select),
-        .status_bit(status_bit),
-        .alu_operation(alu_operation),
-        .mem_size(mem_size),
-        .addressing_mode(addressing_mode)
+        .reg_write_enable(D_RF_enable),
+        .mem_enable(D_mem_enable),
+        .mem_rw(D_mem_readwrite),
+        .mem_size(D_mem_size),
+        .alu_operation(D_ALU_op),
+        .pc_source_select(D_B_instr),
+        .status_bit(store_cc),
+        .addressing_mode(D_am)
     );
 
-    // Register File
+    // Register File (matching diagram connections)
     register_file rf (
-        .PW(write_data),
-        .RW(write_reg),
-        .LE(write_enable),
+        .PW(write_data),            
+        .RW(write_reg),             
+        .LE(write_enable),          
         .CLK(clk),
-        .RC(rc),
-        .RB(rb),
-        .RA(ra),
-        .PROGCOUNT(pc_plus_4_in),
-        .PC(rf_data_c),
-        .PB(rf_data_b),
-        .PA(rf_data_a)
+        .RC(instruction[3:0]),      // Register C read address
+        .RB(instruction[15:12]),    // Register B read address
+        .RA(instruction[19:16]),    // Register A read address
+        .PROGCOUNT(pc_plus_4_in),   // Program counter value
+        .PC(PD),                    // Register C data output
+        .PB(PB),                    // Register B data output
+        .PA(PA)                     // Register A data output
     );
 
-    // Hazard Detection Unit
+    // Hazard/Forwarding Unit (expanded for branch handling)
     HazardUnit hazard_unit (
         .ISA(forward_a),
         .ISB(forward_b),
-        .ISC(forward_c),
+        .ISC(forward_d),
         .stall_pipeline(stall_pipeline),
         .flush_pipeline(flush_pipeline),
         .RW_EX(ex_destination_reg),
         .RW_MEM(mem_destination_reg),
         .RW_WB(wb_destination_reg),
-        .RA_ID(ra),
-        .RB_ID(rb),
-        .RC_ID(rc),
+        .RA_ID(RA),
+        .RB_ID(RB),
+        .RC_ID(RD),
         .enable_LD_EX(ex_mem_read),
-        .enable_RF_EX(reg_write_enable),
-        .enable_RF_MEM(mem_enable),
+        .enable_RF_EX(D_RF_enable),
+        .enable_RF_MEM(D_mem_enable),
         .enable_RF_WB(write_enable),
-        .branch_taken(1'b0),  // Not handling branches in this example
-        .branch_ID(1'b0)      // Not handling branches in this example
+        .branch_taken(B),
+        .branch_ID(D_B_instr || D_BL_instr)
     );
 
-    // Forwarding muxes
-    id_forwarding_mux fwd_mux_a (
+    // Forwarding muxes (matching diagram)
+    id_forwarding_mux mux_a (
         .reg_data(rf_data_a),
         .ex_forwarded_data(ex_result),
         .mem_forwarded_data(mem_result),
         .wb_forwarded_data(wb_result),
         .forward_select(forward_a),
-        .selected_data(reg_data_a)
+        .selected_data(PA)
     );
 
-    id_forwarding_mux fwd_mux_b (
+    id_forwarding_mux mux_b (
         .reg_data(rf_data_b),
         .ex_forwarded_data(ex_result),
         .mem_forwarded_data(mem_result),
         .wb_forwarded_data(wb_result),
         .forward_select(forward_b),
-        .selected_data(reg_data_b)
+        .selected_data(PB)
     );
 
-    id_forwarding_mux fwd_mux_c (
-        .reg_data(rf_data_c),
+    id_forwarding_mux mux_d (
+        .reg_data(rf_data_d),
         .ex_forwarded_data(ex_result),
         .mem_forwarded_data(mem_result),
         .wb_forwarded_data(wb_result),
-        .forward_select(forward_c),
-        .selected_data(reg_data_c)
+        .forward_select(forward_d),
+        .selected_data(PD)
     );
 
-    // Shifter/Sign Extender
+    // Shifter/Sign Extender (matching diagram)
     ShifterSignExtender shifter (
-        .Rm(rf_data_c),
+        .Rm(PD),                     // Using forwarded PD value
         .I(instruction[11:0]),
-        .AM(addressing_mode),
-        .N(extended_immediate)
+        .AM(D_am),
+        .N(N)
     );
 
-    // Assign destination register
-    assign destination_reg = rb;
+    // Condition Handler (new addition from diagram)
+    condition_check cond_check (
+        .cond(condition),
+        .flags(CC),                  // Current condition codes
+        .condition_passed(B)         // Branch taken signal
+    );
 
 endmodule

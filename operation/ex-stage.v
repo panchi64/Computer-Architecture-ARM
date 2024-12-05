@@ -43,10 +43,26 @@ module condition_check(
     end
 endmodule
 
+// Program State Register
+module program_state_register(
+    input wire clk,
+    input wire LE,             // Load Enable
+    input wire [31:0] state_in,
+    output reg [31:0] state_out
+);
+    always @(posedge clk) begin
+        if (LE)
+            state_out <= state_in;
+    end
+endmodule
+
 // Execute Stage Module
 module execute_stage(
     input wire clk,
     input wire reset,
+    
+    // Program State Register control
+    input wire PSR_LE,         // Program State Register Load Enable
     
     // Control signals from ID/EX
     input wire [3:0] alu_operation,  // Direct from control unit, no need for translation
@@ -67,16 +83,29 @@ module execute_stage(
     input wire [1:0] forward_sel_a,
     input wire [1:0] forward_sel_b,
     
+    // Shifter/Sign Extender inputs
+    input wire [31:0] Rm,        // Register value for shift
+    input wire [11:0] I,         // Immediate value
+    input wire [1:0] AM,         // Addressing Mode
+    
+    // Result selection control
+    input wire [1:0] result_sel, // Control for post-ALU multiplexer
+    input wire [31:0] bypass_data, // Data for bypass path
+    
     // Outputs
     output wire [31:0] alu_result,
+    output reg  [31:0] final_result, // After post-ALU mux
     output wire [31:0] branch_target,
     output wire [3:0] flags,     // {N,Z,C,V}
-    output wire branch_taken
+    output wire branch_taken,
+    output wire [31:0] psr_out   // Program State Register output
 );
 
     // Internal wires
     wire [31:0] alu_input_a, alu_input_b;
     wire condition_result;
+    wire [31:0] shifter_out;
+    wire [31:0] psr_in;
     
     // Input Forwarding Muxes
     id_forwarding_mux forward_mux_a(
@@ -125,5 +154,34 @@ module execute_stage(
         .flags(flags),
         .condition_passed(branch_taken)
     );
+    
+    // Shifter/Sign Extender
+    ShifterSignExtender shifter(
+        .Rm(Rm),
+        .I(I),
+        .AM(AM),
+        .N(shifter_out)
+    );
+    
+    // Program State Register
+    program_state_register psr(
+        .clk(clk),
+        .LE(PSR_LE),
+        .state_in(psr_in),
+        .state_out(psr_out)
+    );
+    
+    // Post-ALU multiplexer
+    always @(*) begin
+        case (result_sel)
+            2'b00: final_result = alu_result;
+            2'b01: final_result = shifter_out;
+            2'b10: final_result = bypass_data;
+            default: final_result = alu_result;
+        endcase
+    end
+
+    // PSR input selection (typically flags and other state information)
+    assign psr_in = {24'b0, flags, 4'b0}; // Example format, adjust as needed
 
 endmodule

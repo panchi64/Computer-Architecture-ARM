@@ -11,11 +11,15 @@ module data_memory (
     reg [7:0] byte_temp;
 
     initial begin
-        // Initialize all memory to 0
+        // Initialize to NOP instruction
         for (i = 0; i < 256; i = i + 1) begin
             mem[i] = 8'h0;
         end
+        
+        // Load program and verify
+        $readmemb("validation_code.txt", mem);
     end
+
 
     always @(*) begin
         if (RW == 0) begin

@@ -5,11 +5,14 @@ module instruction_memory(
     reg [7:0] memory [0:255];
     integer i;
 
-    // Initialize memory
     initial begin
+        // Initialize to NOP instruction
         for (i = 0; i < 256; i = i + 1) begin
             memory[i] = 8'h0;
         end
+        
+        // Load program and verify
+        $readmemb("validation_code.txt", memory);
     end
 
     // Instruction fetch - fixed variable names

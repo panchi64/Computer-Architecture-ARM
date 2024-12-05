@@ -21,7 +21,6 @@ module register_file(
         .out(decoder_output)
     );
 
-
     genvar i;
     generate
         for (i = 0; i < 15; i = i + 1) begin : registers
