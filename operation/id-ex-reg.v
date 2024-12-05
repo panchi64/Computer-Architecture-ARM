@@ -31,7 +31,7 @@ module id_ex_reg (
     output reg status_bit_out,
     output reg mem_size_out,
     output reg [1:0] am_bits_out,
-    output reg pc_src_select_out
+    output reg pc_src_select_out,
     output reg [31:0] reg_data_a_out,
     output reg [31:0] reg_data_b_out,
     output reg [31:0] reg_data_c_out,
