@@ -1,188 +1,204 @@
-module ppu(
-    input clk,
-    input reset,
-    output [31:0] PC_out
+module pipeline(
+    input wire clk,
+    input wire reset,
+    output wire [31:0] PC_out
 );
-    // Control signals
-    wire [3:0] ALU_op;
-    wire mem_read, mem_write, reg_write, branch, ALU_src, mem_to_reg;
+    // ---------- Control Signals ----------
+    wire reg_write_enable, mem_enable, mem_rw, mem_to_reg_select;
+    wire alu_source_select, status_bit, pc_source_select, mem_size;
+    wire [3:0] alu_operation;
+    wire [1:0] addressing_mode;
 
-    // --- Wires for IF stage ---
-    wire [31:0] PC, next_PC, instruction;
+    // ---------- IF Stage ----------
+    wire [31:0] PC_current, PC_next;
+    wire [31:0] instruction;
+    wire if_id_enable;
 
-    // --- Wires for ID stage ---
-    wire [31:0] PC_ID, instruction_ID;
-    wire [31:0] read_data1, read_data2, imm_ext;
-    wire [4:0] rs_ID, rt_ID, rd_ID;
-
-    // --- Wires for EX stage ---
-    wire [31:0] read_data1_EX, read_data2_EX, imm_ext_EX;
-    wire [3:0] ALU_op_EX;
-    wire [4:0] rs_EX, rt_EX, rd_EX;
-    wire mem_read_EX, mem_write_EX, reg_write_EX, branch_EX, ALU_src_EX, mem_to_reg_EX;
-    wire [31:0] ALU_result, mux_B_out;
-    wire zero_EX;
-
-    // --- Wires for MEM stage ---
-    wire [31:0] ALU_result_MEM, mem_data_MEM;
-    wire mem_read_MEM, mem_write_MEM, reg_write_MEM, mem_to_reg_MEM;
-
-    // --- Wires for WB stage ---
-    wire [31:0] ALU_result_WB, mem_data_WB, write_data;
-    wire reg_write_WB, mem_to_reg_WB;
-
-    // --- IF Stage ---
-    pc_register PC_reg(
+    // Program Counter
+    program_counter pc(
         .clk(clk),
         .reset(reset),
-        .next_PC(next_PC),
-        .PC(PC)
+        .enable(~stall_pipeline),
+        .pc_next(PC_next),
+        .pc_current(PC_current)
     );
 
-    instruction_memory inst_mem(
-        .address(PC),
+    // Instruction Memory
+    instruction_memory imem(
+        .address(PC_current[7:0]),  // Using 8-bit address as per instruction_memory.v
         .instruction(instruction)
     );
 
-    // Calculate next PC
-    assign next_PC = PC + 4;  // Simple increment (without branch prediction)
+    assign PC_next = pc_source_select ? branch_target : PC_current + 4;
 
-    // --- IF/ID Pipeline Register ---
-    reg_if_id IF_ID(
+    // ---------- IF/ID Pipeline Register ----------
+    wire [31:0] instruction_id;
+    wire [1:0] am_bits_if_id;
+
+    if_id_reg if_id(
         .clk(clk),
-        .reset(reset),
-        .PC_in(PC),
+        .reset(reset || flush_pipeline),
+        .enable(~stall_pipeline),
         .instruction_in(instruction),
-        .PC_out(PC_ID),
-        .instruction_out(instruction_ID)
+        .am_bits_in(addressing_mode),
+        .instruction_out(instruction_id),
+        .am_bits_out(am_bits_if_id)
     );
 
-    // --- ID Stage ---
-    control_unit control(
-        .opcode(instruction_ID[31:26]),
-        .ALU_op(ALU_op),
-        .mem_read(mem_read),
-        .mem_write(mem_write),
-        .reg_write(reg_write),
-        .branch(branch),
-        .ALU_src(ALU_src),
-        .mem_to_reg(mem_to_reg)
+    // ---------- ID Stage ----------
+    wire [3:0] ra_id = instruction_id[19:16];  // Rn
+    wire [3:0] rb_id = instruction_id[15:12];  // Rd
+    wire [3:0] rc_id = instruction_id[3:0];    // Rm
+
+    // Control Unit
+    control_unit cu(
+        .instruction(instruction_id),
+        .reg_write_enable(reg_write_enable),
+        .mem_enable(mem_enable),
+        .mem_rw(mem_rw),
+        .mem_to_reg_select(mem_to_reg_select),
+        .alu_source_select(alu_source_select),
+        .status_bit(status_bit),
+        .alu_operation(alu_operation),
+        .pc_source_select(pc_source_select),
+        .mem_size(mem_size),
+        .addressing_mode(addressing_mode)
     );
 
-    register_file reg_file(
+    // ---------- Hazard Unit ----------
+    wire [1:0] ISA, ISB, ISC;
+    wire stall_pipeline, flush_pipeline;
+
+    HazardUnit hazard_unit(
+        .ISA(ISA),
+        .ISB(ISB),
+        .ISC(ISC),
+        .stall_pipeline(stall_pipeline),
+        .flush_pipeline(flush_pipeline),
+        .RW_EX(rd_ex),
+        .RW_MEM(rd_mem),
+        .RW_WB(rd_wb),
+        .RA_ID(ra_id),
+        .RB_ID(rb_id),
+        .RC_ID(rc_id),
+        .enable_LD_EX(mem_enable_ex && ~mem_rw_ex),
+        .enable_RF_EX(reg_write_enable_ex),
+        .enable_RF_MEM(reg_write_enable_mem),
+        .enable_RF_WB(reg_write_enable_wb),
+        .branch_taken(branch_taken),
+        .branch_ID(is_branch)
+    );
+
+    // ---------- ID/EX Pipeline Register ----------
+    wire reg_write_enable_ex, mem_enable_ex, mem_rw_ex;
+    wire mem_to_reg_select_ex, alu_src_select_ex;
+    wire [3:0] alu_control_ex;
+    wire status_bit_ex, mem_size_ex;
+    wire [1:0] am_bits_ex;
+    wire pc_src_select_ex;
+    wire [3:0] rd_ex;
+
+    id_ex_reg id_ex(
         .clk(clk),
-        .read_reg1(instruction_ID[25:21]),
-        .read_reg2(instruction_ID[20:16]),
-        .write_reg(rd_ID),
-        .write_data(write_data),
-        .reg_write(reg_write_WB),
-        .read_data1(read_data1),
-        .read_data2(read_data2)
+        .reset(reset || flush_pipeline),
+        .reg_write_enable_in(reg_write_enable),
+        .mem_enable_in(mem_enable),
+        .mem_rw_in(mem_rw),
+        .mem_to_reg_select_in(mem_to_reg_select),
+        .alu_src_select_in(alu_source_select),
+        .alu_control_in(alu_operation),
+        .status_bit_in(status_bit),
+        .mem_size_in(mem_size),
+        .am_bits_in(addressing_mode),
+        .pc_src_select_in(pc_source_select),
+        // Outputs
+        .reg_write_enable_out(reg_write_enable_ex),
+        .mem_enable_out(mem_enable_ex),
+        .mem_rw_out(mem_rw_ex),
+        .mem_to_reg_select_out(mem_to_reg_select_ex),
+        .alu_src_select_out(alu_src_select_ex),
+        .alu_control_out(alu_control_ex),
+        .status_bit_out(status_bit_ex),
+        .mem_size_out(mem_size_ex),
+        .am_bits_out(am_bits_ex),
+        .pc_src_select_out(pc_src_select_ex)
     );
 
-    sign_extend sign_ext(
-        .instr(instruction_ID[15:0]),
-        .data_out(imm_ext)
+    // ---------- EX Stage ----------
+    wire [31:0] alu_result;
+    
+    // ALU implementation (you'll need to create this module)
+    alu alu_unit(
+        .in_a(alu_in_a),
+        .in_b(alu_in_b),
+        .alu_op(alu_control_ex),
+        .out(alu_result)
     );
 
-    // --- ID/EX Pipeline Register ---
-    reg_id_ex ID_EX(
-        .clk(clk),
-        .reset(reset),
-        .read_data1_in(read_data1),
-        .read_data2_in(read_data2),
-        .imm_ext_in(imm_ext),
-        .rs_in(instruction_ID[25:21]),
-        .rt_in(instruction_ID[20:16]),
-        .rd_in(instruction_ID[15:11]),
-        .ALU_op_in(ALU_op),
-        .mem_read_in(mem_read),
-        .mem_write_in(mem_write),
-        .reg_write_in(reg_write),
-        .branch_in(branch),
-        .ALU_src_in(ALU_src),
-        .mem_to_reg_in(mem_to_reg),
-        .read_data1_out(read_data1_EX),
-        .read_data2_out(read_data2_EX),
-        .imm_ext_out(imm_ext_EX),
-        .rs_out(rs_EX),
-        .rt_out(rt_EX),
-        .rd_out(rd_EX),
-        .ALU_op_out(ALU_op_EX),
-        .mem_read_out(mem_read_EX),
-        .mem_write_out(mem_write_EX),
-        .reg_write_out(reg_write_EX),
-        .branch_out(branch_EX),
-        .ALU_src_out(ALU_src_EX),
-        .mem_to_reg_out(mem_to_reg_EX)
-    );
+    // ---------- EX/MEM Pipeline Register ----------
+    wire reg_write_enable_mem, mem_enable_mem, mem_rw_mem;
+    wire mem_to_reg_select_mem, alu_src_select_mem;
+    wire [3:0] alu_control_mem;
+    wire status_bit_mem, mem_size_mem;
+    wire [31:0] alu_result_mem;
+    wire [3:0] rd_mem;
 
-    // --- EX Stage ---
-    mux2to1 #(.WIDTH(32)) ALU_mux(
-        .a(read_data2_EX),
-        .b(imm_ext_EX),
-        .sel(ALU_src_EX),
-        .y(mux_B_out)
-    );
-
-    alu ALU_unit(
-        .A(read_data1_EX),
-        .B(mux_B_out),
-        .ALU_op(ALU_op_EX),
-        .result(ALU_result),
-        .zero(zero_EX)
-    );
-
-    // --- EX/MEM Pipeline Register ---
-    reg_ex_mem EX_MEM(
-        .clk(clk),
-        .reset(reset),
-        .ALU_result_in(ALU_result),
-        .mem_data_in(read_data2_EX),
-        .mem_read_in(mem_read_EX),
-        .mem_write_in(mem_write_EX),
-        .reg_write_in(reg_write_EX),
-        .mem_to_reg_in(mem_to_reg_EX),
-        .ALU_result_out(ALU_result_MEM),
-        .mem_data_out(mem_data_MEM),
-        .mem_read_out(mem_read_MEM),
-        .mem_write_out(mem_write_MEM),
-        .reg_write_out(reg_write_MEM),
-        .mem_to_reg_out(mem_to_reg_MEM)
-    );
-
-    // --- MEM Stage ---
-    data_memory data_mem(
-        .address(ALU_result_MEM),
-        .write_data(mem_data_MEM),
-        .mem_read(mem_read_MEM),
-        .mem_write(mem_write_MEM),
-        .read_data(mem_data_MEM)
-    );
-
-    // --- MEM/WB Pipeline Register ---
-    reg_mem_wb MEM_WB(
+    ex_mem_reg ex_mem(
         .clk(clk),
         .reset(reset),
-        .ALU_result_in(ALU_result_MEM),
-        .mem_data_in(mem_data_MEM),
-        .reg_write_in(reg_write_MEM),
-        .mem_to_reg_in(mem_to_reg_MEM),
-        .ALU_result_out(ALU_result_WB),
-        .mem_data_out(mem_data_WB),
-        .reg_write_out(reg_write_WB),
-        .mem_to_reg_out(mem_to_reg_WB)
+        .reg_write_enable_in(reg_write_enable_ex),
+        .mem_enable_in(mem_enable_ex),
+        .mem_rw_in(mem_rw_ex),
+        .mem_to_reg_select_in(mem_to_reg_select_ex),
+        .alu_src_select_in(alu_src_select_ex),
+        .alu_control_in(alu_control_ex),
+        .status_bit_in(status_bit_ex),
+        .mem_size_in(mem_size_ex),
+        // Outputs
+        .reg_write_enable_out(reg_write_enable_mem),
+        .mem_enable_out(mem_enable_mem),
+        .mem_rw_out(mem_rw_mem),
+        .mem_to_reg_select_out(mem_to_reg_select_mem),
+        .alu_src_select_out(alu_src_select_mem),
+        .alu_control_out(alu_control_mem),
+        .status_bit_out(status_bit_mem),
+        .mem_size_out(mem_size_mem)
     );
 
-    // --- WB Stage ---
-    mux2to1 #(.WIDTH(32)) wb_mux(
-        .a(ALU_result_WB),
-        .b(mem_data_WB),
-        .sel(mem_to_reg_WB),
-        .y(write_data)
+    // ---------- MEM Stage ----------
+    // Data memory interface would go here
+    // You'll need to create a data_memory module
+
+    // ---------- MEM/WB Pipeline Register ----------
+    wire reg_write_enable_wb, mem_enable_wb, mem_rw_wb;
+    wire mem_to_reg_select_wb, alu_src_select_wb;
+    wire [3:0] alu_control_wb;
+    wire status_bit_wb, mem_size_wb;
+    wire [3:0] rd_wb;
+
+    mem_wb_reg mem_wb(
+        .clk(clk),
+        .reset(reset),
+        .reg_write_enable_in(reg_write_enable_mem),
+        .mem_enable_in(mem_enable_mem),
+        .mem_rw_in(mem_rw_mem),
+        .mem_to_reg_select_in(mem_to_reg_select_mem),
+        .alu_src_select_in(alu_src_select_mem),
+        .alu_control_in(alu_control_mem),
+        .status_bit_in(status_bit_mem),
+        .mem_size_in(mem_size_mem),
+        // Outputs
+        .reg_write_enable_out(reg_write_enable_wb),
+        .mem_enable_out(mem_enable_wb),
+        .mem_rw_out(mem_rw_wb),
+        .mem_to_reg_select_out(mem_to_reg_select_wb),
+        .alu_src_select_out(alu_src_select_wb),
+        .alu_control_out(alu_control_wb),
+        .status_bit_out(status_bit_wb),
+        .mem_size_out(mem_size_wb)
     );
 
-    // PC output (for monitoring)
-    assign PC_out = PC;
+    // Output assignment
+    assign PC_out = PC_current;
 
 endmodule
